@@ -85,8 +85,6 @@ bool RConsole::execute(const QString &code)
 
     cmdexpr = PROTECT(R_ParseVector(cmdSexp, -1, &status, R_NilValue));
 
-    std::cout << "1" << std::endl;
-
     switch (status)
     {
     case PARSE_OK:
@@ -94,44 +92,35 @@ bool RConsole::execute(const QString &code)
         for(int i = 0; i < Rf_length(cmdexpr); i++) {
             int errorOccurred;
             ans = R_tryEval(VECTOR_ELT(cmdexpr, i), R_GlobalEnv, &errorOccurred);
-            std::cout << "2" << std::endl;
             if (errorOccurred) {
-                std::cout << "3" << std::endl;
-                if (m_verbose) {
-                    QString evalError = R_curErrorBuf();
-                    emit error(evalError);
-                }
+                QString evalError = R_curErrorBuf();
+                emit error(evalError);
 
                 UNPROTECT(2);
                 return false;
-            }
-            std::cout << "4" << std::endl;
-            if (m_verbose)
-                emit value(RProxy(ans));
+            } else if (m_verbose)
+                Rf_PrintValue(ans);
         }
+        emit value(RProxy(ans));
         break;
     case PARSE_INCOMPLETE:
         // need to read another line
         break;
     case PARSE_NULL:
-        if (m_verbose)
-            emit error(QString("ParseStatus is null (%1)").arg(status));
+        emit error(QString("ParseStatus is null (%1)").arg(status));
         UNPROTECT(2);
         return false;
         break;
     case PARSE_ERROR:
-        if (m_verbose)
-            emit error(QString("Parse Error: \"%1\"").arg(code));
+        emit error(QString("Parse Error: \"%1\"").arg(code));
         UNPROTECT(2);
         return false;
         break;
     case PARSE_EOF:
-        if (m_verbose)
-            emit error(QString("ParseStatus is eof"));
+        emit error(QString("ParseStatus is eof"));
         break;
     default:
-        if (m_verbose)
-             emit error(QString("ParseStatus is not documented"));
+        emit error(QString("ParseStatus is not documented"));
         UNPROTECT(2);
         return false;
         break;
