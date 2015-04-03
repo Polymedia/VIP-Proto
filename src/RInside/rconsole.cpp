@@ -6,8 +6,6 @@
 #include <R_ext/RStartup.h>
 #include <R_ext/Parse.h>
 
-#include <iostream>
-
 static RConsole *R = nullptr;
 
 static int ReadConsole(const char *prompt, char *buf, int len, int addtohistory)
@@ -75,7 +73,28 @@ RConsole::~RConsole()
     R = nullptr;
 }
 
-bool RConsole::execute(const QString &code)
+RProxy RConsole::get(const QString &name) const
+{
+    SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
+    SEXP res = Rf_findVarInFrame(R_GlobalEnv, nameSym);
+
+    if(res == R_UnboundValue)
+        return R_NilValue;
+
+    /* We need to evaluate if it is a promise */
+    if(TYPEOF(res) == PROMSXP)
+        res = Rf_eval(res, R_GlobalEnv);
+
+    return res ;
+}
+
+void RConsole::set(const QString &name, const RProxy &var)
+{
+    SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
+    Rf_defineVar(nameSym, var.data(), R_GlobalEnv);
+}
+
+bool RConsole::execute(const QString &code, RProxy& value)
 {
     ParseStatus status;
     SEXP ans, cmdSexp, cmdexpr = R_NilValue;
@@ -101,7 +120,7 @@ bool RConsole::execute(const QString &code)
             } else if (m_verbose)
                 Rf_PrintValue(ans);
         }
-        emit value(RProxy(ans));
+        value = RProxy(ans);
         break;
     case PARSE_INCOMPLETE:
         // need to read another line

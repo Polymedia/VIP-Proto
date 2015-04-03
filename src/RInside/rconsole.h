@@ -18,11 +18,13 @@ public:
     bool verbose() const { return m_verbose; }
     void setVerbose(bool v) { m_verbose = v; }
 
+    RProxy get(const QString &name) const;
+    void set(const QString &name, const RProxy& var);
+
 public slots:
-    bool execute(const QString& code);
+    bool execute(const QString& code, RProxy& value = RProxy());
 
 signals:
-    void value(RProxy);
     void write(QString);
     void callback();
     void busy(bool);
