@@ -6,9 +6,9 @@
 ###    PROJECT SETUP    ###
 ###########################
 
-TEMPLATE = lib
+TEMPLATE = app
 
-TARGET = RInside
+TARGET = REditor
 
 DEFINES += RINSIDE_LIBRARY
 win32:DEFINES += Win32
@@ -17,19 +17,17 @@ win32:DEFINES += Win32
 ###      LINK LIBS      ###
 ###########################
 # Qt
-QT += core
+QT += core gui widgets
 
-# R
-R_HOME = $$system(R RHOME)
-
-INCLUDEPATH += $$R_HOME/include
-LIBS += -L$$R_HOME/lib -lR
+# R Inside
+INCLUDEPATH += $$SRC/RInside
+LIBS += -L"$$LIB/RInside"
+LIBS += -lRInside
 
 ###########################
 ###    SETUP OUTPUT     ###
 ###########################
 
-DESTDIR = $$LIB/RInside
 
 ###########################
 ###        DEPLOY       ###
@@ -43,3 +41,4 @@ DLLDESTDIR = $$BIN
 
 HEADERS += *.h
 SOURCES += *.cpp
+FORMS   += *.ui

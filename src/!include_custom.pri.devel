@@ -1,0 +1,6 @@
+##
+## Developer specific projects configuration
+##
+##################################################################################
+
+OTHER_FILES += !include_custom.pri.devel
