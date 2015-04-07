@@ -34,6 +34,9 @@
     #elif _MSC_VER == 1700
         #define RUDE_MOCKS_COMPILER_MAJOR_VERSION 11
         #define RUDE_MOCKS_COMPILER_MINOR_VERSION 0
+    #elif _MSC_VER == 1800
+        #define RUDE_MOCKS_COMPILER_MAJOR_VERSION 12
+        #define RUDE_MOCKS_COMPILER_MINOR_VERSION 0
     #endif
 #elif defined(__GNUC__)
     #define RUDE_MOCKS_COMPILER_GCC 1
