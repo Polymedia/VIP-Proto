@@ -7,16 +7,26 @@ namespace Ui {
 class MainWindow;
 }
 
+class RConsole;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow(RConsole *r, QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void onExecuteClicked();
+
+    void onRMessage(const QString &message);
+
 private:
-    Ui::MainWindow *ui;
+    QString m_plotFilePath;
+    RConsole *m_rconsole;
+
+    Ui::MainWindow *ui;    
 };
 
 #endif // MAINWINDOW_H

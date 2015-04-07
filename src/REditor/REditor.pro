@@ -10,9 +10,6 @@ TEMPLATE = app
 
 TARGET = REditor
 
-DEFINES += RINSIDE_LIBRARY
-win32:DEFINES += Win32
-
 ###########################
 ###      LINK LIBS      ###
 ###########################
@@ -28,6 +25,7 @@ LIBS += -lRInside
 ###    SETUP OUTPUT     ###
 ###########################
 
+DESTDIR = $$BIN
 
 ###########################
 ###        DEPLOY       ###
