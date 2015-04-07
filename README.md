@@ -17,9 +17,9 @@ Visiology Intelligence Platform
 
 ########################### Run ##############################
 
-* REditor
-  Make sure that R is included to your path (see Build procedure step 1)
+* All
+  VS2013 Redist
   Make sure that Qt is included to your path
 
-* Tests
-  Make sure that Qt is included to your path
+* REditor
+  Make sure that R is included to your path (see Build procedure step 1)
