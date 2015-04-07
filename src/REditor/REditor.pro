@@ -25,13 +25,12 @@ LIBS += -lRInside
 ###    SETUP OUTPUT     ###
 ###########################
 
-DESTDIR = $$BIN
+DESTDIR = $$BIN/REditor
+DLLDESTDIR = $$BIN/REditor
 
 ###########################
 ###        DEPLOY       ###
 ###########################
-
-DLLDESTDIR = $$BIN
 
 ###########################
 ###       SOURCE        ###

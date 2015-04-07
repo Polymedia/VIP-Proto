@@ -10,3 +10,13 @@ SUBDIRS = \
 
 REditor.depends += \
     RInside
+    
+CONFIG(INCLUDE_TESTS) {
+    SUBDIRS += Tests
+
+    Tests.file = ../tests/Tests.pro
+
+    Tests.depends += \
+        RInside \
+        REditor
+} 

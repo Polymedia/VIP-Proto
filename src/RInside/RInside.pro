@@ -23,7 +23,7 @@ QT += core
 R_HOME = $$system(R RHOME)
 
 INCLUDEPATH += $$R_HOME/include
-LIBS += -L$$PWD/../../dep/lib/R -lR
+LIBS += -L$$DEP_LIB/R -lR
 
 ###########################
 ###    SETUP OUTPUT     ###
@@ -35,7 +35,7 @@ DESTDIR = $$LIB/RInside
 ###        DEPLOY       ###
 ###########################
 
-DLLDESTDIR = $$BIN
+DLLDESTDIR = $$BIN/REditor
 
 ###########################
 ###       SOURCE        ###

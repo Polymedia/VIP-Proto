@@ -8,14 +8,14 @@
 
 static RConsole *R = nullptr;
 
-static int ReadConsole(const char *prompt, char *buf, int len, int addtohistory)
+static int ReadConsole(const char *prompt, char *buf, int len, int /*addtohistory*/)
 {
     fputs(prompt, stdout);
     fflush(stdout);
     if(fgets(buf, len, stdin)) return 1; else return 0;
 }
 
-static void WriteConsole(const char *buf, int len)
+static void WriteConsole(const char *buf, int /*len*/)
 {
     //printf("%s", buf);
     R->write(buf);

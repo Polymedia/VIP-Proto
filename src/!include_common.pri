@@ -28,5 +28,14 @@
     !win32-msvc2003:!win32-msvc2005:!win32-msvc2008:!win32-msvc2010:!win32-msvc2013 {
         error("Only win32 MSVC compiler supported!")
     }
+
+    # Tests configuration
+    CONFIG(INCLUDE_TESTS) {
+        # We need to setup bin paths here because
+        # we have to deploy project *.dll from project source *.pro
+        # Tests directories
+        TESTS_BIN = $$BIN/Tests
+        TESTS_SRC = $$ROOT/tests
+    }
 }
 # End Include checking

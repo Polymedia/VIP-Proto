@@ -4,3 +4,8 @@
 ##################################################################################
 
 OTHER_FILES += !include_custom.pri.devel
+
+##
+## Compile tests with project
+##
+CONFIG += INCLUDE_TESTS
