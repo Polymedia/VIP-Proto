@@ -23,7 +23,7 @@ QT += core
 R_HOME = $$system(R RHOME)
 
 INCLUDEPATH += $$R_HOME/include
-LIBS += -L$$R_HOME/lib -lR
+LIBS += -L$$PWD/../../dep/lib/R -lR
 
 ###########################
 ###    SETUP OUTPUT     ###
