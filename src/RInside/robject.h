@@ -38,7 +38,10 @@ public:
     };
 
 public:
-    RObject();
+    RObject(RStorage storage = Other, 
+        RType type = Null, 
+        int rows = 1, 
+        int columns = 1);
     RObject(SEXP s);
     ~RObject();
 

@@ -78,20 +78,89 @@ static int rType(int type)
     }
 }
 
-QMap<QString, SEXP> RObject::m_shortcuts;
-
-RObject::RObject() :
-    m_object(R_NilValue),
-    m_storage(evalStorage(m_object)),
-    m_type(evalType(m_object))
+static int rType(RObject::RType type)
 {
+    switch (type)
+    {
+    case RObject::Null: return NILSXP;
+    case RObject::Bool: return LGLSXP;
+    case RObject::Int: return INTSXP;
+    case RObject::Float: return REALSXP;
+    case RObject::Point: return CPLXSXP;
+    case RObject::String: return STRSXP;
+    case RObject::Byte: return RAWSXP;
+    case RObject::Generic: return VECSXP;
+    default: return NILSXP;
+    }
 }
+
+static SEXP createDataframe(int rows, int columns)
+{
+    Shield df(Rf_allocVector(VECSXP, columns));
+    Rf_setAttrib(df, R_NamesSymbol, Rf_allocVector(STRSXP, columns));
+    Rf_setAttrib(df, R_RowNamesSymbol, Rf_allocVector(INTSXP, rows));
+    Rf_setAttrib(df, R_ClassSymbol, Rf_mkString("data.frame"));
+    return df;
+}
+
+static SEXP createMatrix(RObject::RType type, int rows, int columns)
+{
+    return Rf_allocMatrix(rType(type), rows, columns);
+}
+
+static SEXP createList(int rows)
+{
+    return Rf_allocVector(VECSXP, rows);
+}
+
+static SEXP createArray(RObject::RType type, int rows, int columns)
+{
+    Shield dim(allocVector(INTSXP, 2));
+    plainData<int>(dim, 0) = rows;
+    plainData<int>(dim, 1) = columns;
+    return Rf_allocArray(rType(type), dim);
+}
+
+static SEXP createVector(RObject::RType type, int rows)
+{
+    return Rf_allocVector(rType(type), rows);
+}
+
+QMap<QString, SEXP> RObject::m_shortcuts;
 
 RObject::RObject(SEXP s) :
     m_object(s),
     m_storage(evalStorage(m_object)),
     m_type(evalType(m_object))
 {
+}
+
+RObject::RObject(RStorage storage, RType type, int rows, int columns)
+{
+    switch (storage)
+    {
+    case RObject::Frame:
+        m_object = createDataframe(rows, columns);
+        break;
+    case RObject::Matrix:
+        m_object = createMatrix(type, rows, columns);
+        break;
+    case RObject::List:
+        m_object = createList(rows);
+        break;
+    case RObject::Array:
+        m_object = createArray(type, rows, columns);
+        break;
+    case RObject::Vector:
+        m_object = createVector(type, rows);
+        break;
+    default:
+        m_object = R_NilValue;
+        break;
+    }
+
+    m_storage = evalStorage(m_object);
+    m_type = evalType(m_object);
 }
 
 RObject::~RObject()
@@ -175,10 +244,7 @@ RObject RObject::fromModel(QAbstractTableModel *model)
     int rows = model->rowCount();
 
     //Create data frame
-    Shield df(Rf_allocVector(VECSXP, columns));
-    Rf_setAttrib(df, R_NamesSymbol, Rf_allocVector(STRSXP, columns));
-    Rf_setAttrib(df, R_RowNamesSymbol, Rf_allocVector(INTSXP, rows));
-    Rf_setAttrib(df, R_ClassSymbol, Rf_mkString("data.frame"));
+    Shield df(createDataframe(rows, columns));
 
     //Load column names
     SEXP names = Rf_getAttrib(df, R_NamesSymbol);
