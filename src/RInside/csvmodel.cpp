@@ -41,7 +41,9 @@ static QVariant toVariant(QMetaType::Type type, const QString &value)
 }
 
 CsvModel::CsvModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    m_rowCount(0),
+    m_columnCount(0)
 {
 }
 
