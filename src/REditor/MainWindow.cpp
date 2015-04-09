@@ -6,8 +6,6 @@
 
 #include "Console.h"
 
-#include <QDebug>
-
 MainWindow::MainWindow(RConsole *r, QWidget *parent) :
     QMainWindow(parent),
     m_rconsole(r),
@@ -47,7 +45,6 @@ void MainWindow::onExecuteClicked(const QString &command)
     connect(m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
     connect(m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
 
-    qDebug() << command;
     m_rconsole->execute(command);
 
     disconnect(m_rconsole, 0, this, 0);
@@ -57,16 +54,11 @@ void MainWindow::onExecuteClicked(const QString &command)
 void MainWindow::onRMessageOk(const QString &message)
 {
     m_outputBuf.append(message);
-
-    //qDebug() << "OK!" << m_outputBuf << message.endsWith("\n");
-
     m_outputTimer.start();
 }
 
 void MainWindow::onRMessageError(const QString &message)
 {
-    qDebug() << "ERROR!" << message << (message != m_outputBuf) << m_outputBuf;
-
     if (message != m_outputBuf && message != m_lastOutput)
         m_guiConsole->output(message);
 }

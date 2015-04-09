@@ -15,14 +15,18 @@ protected:
     void keyPressEvent(QKeyEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
 
-private:
+private slots:
+    void onCursorPositionChanged();
     void onEnter();
+
+private:
     void insertPrompt(bool insertNewBlock = true);
     void historyAdd(const QString &cmd);
     void historyBack();
     void historyForward();
     void findLastBlock(int &first, int &last);
     bool isCursorInLastBlock(int curPos = -1);
+    void setEditing(bool allow);
 
 private:
     QString m_prompt;

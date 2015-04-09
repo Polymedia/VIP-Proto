@@ -3,7 +3,6 @@
 #include <QTextBlock>
 #include <QScrollBar>
 
-#include <QDebug>
 #include <QMenu>
 
 Console::Console(QWidget *parent) :
@@ -15,6 +14,8 @@ Console::Console(QWidget *parent) :
     m_historyPos = 0;
     insertPrompt(false);
     m_isLocked = false;
+
+    connect(this, SIGNAL(cursorPositionChanged()), SLOT(onCursorPositionChanged()));
 }
 
 void Console::keyPressEvent(QKeyEvent *event)
@@ -67,6 +68,12 @@ void Console::contextMenuEvent(QContextMenuEvent *event)
     //QPlainTextEdit::contextMenuEvent(event);
 }
 
+void Console::onCursorPositionChanged()
+{
+    // Если курсор не в последнем блоке, то отключаем редактирование
+    setEditing(isCursorInLastBlock());
+}
+
 void Console::onEnter()
 {
     QTextCursor cursor = textCursor();
@@ -77,7 +84,7 @@ void Console::onEnter()
         return;
     }
 
-    // Если курсор при нажатии не в конце строчки, то перемещаем в конец
+    // Если курсор при нажатии Enter не в конце строчки, то перемещаем в конец
     if (cursor.positionInBlock() != cursor.block().length()) {
         cursor.setPosition(cursor.block().position() + cursor.block().length() - 1);
         setTextCursor(cursor);
@@ -91,7 +98,6 @@ void Console::onEnter()
 
     // Если вставили несколько строк с переносом строки, то делим на команды и выполняем по очереди
     QStringList cmdList = cmd.split("\n");
-    //qDebug() << cmdList << lastPromtPos;
     foreach (auto tmpCmd, cmdList) {
         emit command(tmpCmd);
     }
@@ -100,9 +106,6 @@ void Console::onEnter()
 void Console::output(const QString &s)
 {
     textCursor().insertBlock();
-    //    QTextCharFormat format;
-    //    format.setForeground(error ? Qt::red : Qt::black);
-    //    textCursor().setBlockCharFormat(format);
     textCursor().insertText(s);
     insertPrompt();
     m_isLocked = false;
@@ -112,9 +115,6 @@ void Console::insertPrompt(bool insertNewBlock)
 {
     if (insertNewBlock)
         textCursor().insertBlock();
-    //    QTextCharFormat format;
-    //    format.setForeground(Qt::green);
-    //    textCursor().setBlockCharFormat(format);
     textCursor().insertText(m_prompt);
     scrollDown();
 }
@@ -183,12 +183,23 @@ bool Console::isCursorInLastBlock(int curPos)
     if (curPos < 0) {
         QTextCursor cur = textCursor();
         pos = cur.position();
-    } else {
+    } else
         pos = curPos;
-    }
 
     if (firstPos <= pos && pos <= lastPos && textCursor().selectionStart() >= firstPos)
         return true;
     else
         return false;
+}
+
+void Console::setEditing(bool allow)
+{
+    Qt::TextInteractionFlags flags = textInteractionFlags();
+
+    if (allow)
+        flags |= Qt::TextEditable;
+    else
+        flags &= ~Qt::TextEditable;
+
+    setTextInteractionFlags(flags);
 }
