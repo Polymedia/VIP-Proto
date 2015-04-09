@@ -126,7 +126,7 @@ void RConsole::set(const QString &name, const RObject &var)
     Rf_defineVar(nameSym, var, R_GlobalEnv);
 }
 
-bool RConsole::execute(const QString &code, RObject& value)
+bool RConsole::execute(const QString &code)
 {
     ParseStatus status;
     SEXP ans, cmdSexp, cmdexpr = R_NilValue;
@@ -152,32 +152,26 @@ bool RConsole::execute(const QString &code, RObject& value)
             } else if (m_verbose)
                 Rf_PrintValue(ans);
         }
-        value = RObject(ans);
-        break;
+        UNPROTECT(2);
+        return true;
     case PARSE_INCOMPLETE:
-        // need to read another line
+        emit error(QString("Parse error (%1): parse is incomplete").arg(status));
         break;
     case PARSE_NULL:
-        emit error(QString("ParseStatus is null (%1)").arg(status));
-        UNPROTECT(2);
-        return false;
+        emit error(QString("Parse error (%1): parse is null").arg(status));
         break;
     case PARSE_ERROR:
-        emit error(QString("Parse Error: \"%1\"").arg(code));
-        UNPROTECT(2);
-        return false;
+        emit error(QString("Parse error (%1): \"%2\"").arg(status).arg(code));
         break;
     case PARSE_EOF:
-        emit error(QString("ParseStatus is eof"));
+        emit error(QString("Parse error (%1): end of file"));
         break;
     default:
-        emit error(QString("ParseStatus is not documented"));
-        UNPROTECT(2);
-        return false;
+        emit error(QString("Parse error (%1): not documented"));
         break;
     }
 
     UNPROTECT(2);
-    return true;
+    return false;
 }
 

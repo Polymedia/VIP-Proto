@@ -22,7 +22,7 @@ public:
     void set(const QString &name, const RObject& var);
 
 public slots:
-    bool execute(const QString& code, RObject& value = RObject());
+    bool execute(const QString& code);
 
 signals:
     void write(QString);
