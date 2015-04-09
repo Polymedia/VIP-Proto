@@ -19,7 +19,7 @@ MainWindow::MainWindow(RConsole *r, QWidget *parent) :
 
     ui->horizontalLayout->insertWidget(0, m_guiConsole);
 
-    connect(m_guiConsole, SIGNAL(onCommand(QString)), SLOT(onExecuteClicked(QString)));
+    connect(m_guiConsole, SIGNAL(command(QString)), SLOT(onExecuteClicked(QString)));
     connect(ui->btnUpdatePlot, SIGNAL(clicked()), SLOT(updatePlot()));
     connect(&m_outputTimer, SIGNAL(timeout()), SLOT(printOutputBuf()));
 

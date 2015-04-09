@@ -9,18 +9,18 @@
 Console::Console(QWidget *parent) :
     QPlainTextEdit(parent)
 {
-    prompt = "> ";
+    m_prompt = "> ";
 
-    history = new QStringList;
-    historyPos = 0;
+    m_history = new QStringList;
+    m_historyPos = 0;
     insertPrompt(false);
-    isLocked = false;
+    m_isLocked = false;
 }
 
 void Console::keyPressEvent(QKeyEvent *event)
 {
     // Если консоль заблочена, или курсор находится не в последнем блоке, то игнорим нажатия клавы
-    if (isLocked || !isCursorInLastBlock())
+    if (m_isLocked || !isCursorInLastBlock())
         return;
 
     if (event->modifiers() == Qt::NoModifier) {
@@ -30,7 +30,7 @@ void Console::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Down: historyForward(); break;
 
         case Qt::Key_Left: {
-            if (textCursor().positionInBlock() > prompt.length())
+            if (textCursor().positionInBlock() > m_prompt.length())
                 QPlainTextEdit::keyPressEvent(event);
             break;
         }
@@ -39,9 +39,13 @@ void Console::keyPressEvent(QKeyEvent *event)
             break;
         }
 
-        case Qt::Key_Backspace:
+        case Qt::Key_Backspace: {
+            if (textCursor().positionInBlock() > m_prompt.length())
+                QPlainTextEdit::keyPressEvent(event);
+            break;
+        }
         case Qt::Key_Delete: {
-            if (textCursor().positionInBlock() > prompt.length())
+            if (textCursor().positionInBlock() >= m_prompt.length())
                 QPlainTextEdit::keyPressEvent(event);
             break;
         }
@@ -53,14 +57,14 @@ void Console::keyPressEvent(QKeyEvent *event)
             && (event->modifiers() == Qt::NoModifier || event->modifiers() == Qt::ShiftModifier))
         QPlainTextEdit::keyPressEvent(event);
 
-    QString cmd = textCursor().block().text().mid(prompt.length());
-    emit onChange(cmd);
+    QString cmd = textCursor().block().text().mid(m_prompt.length());
+    emit commandStringChanged(cmd);
 }
 
-void Console::contextMenuEvent(QContextMenuEvent *ev)
+void Console::contextMenuEvent(QContextMenuEvent *event)
 {
     // Убираем контекстное меню
-    //QPlainTextEdit::contextMenuEvent(ev);
+    //QPlainTextEdit::contextMenuEvent(event);
 }
 
 void Console::onEnter()
@@ -68,7 +72,7 @@ void Console::onEnter()
     QTextCursor cursor = textCursor();
 
     // Ввод пустой строчки
-    if (cursor.positionInBlock() == prompt.length()) {
+    if (cursor.positionInBlock() == m_prompt.length()) {
         insertPrompt();
         return;
     }
@@ -79,17 +83,17 @@ void Console::onEnter()
         setTextCursor(cursor);
     }
 
-    int lastPromtPos = toPlainText().lastIndexOf(prompt);
+    int lastPromtPos = toPlainText().lastIndexOf(m_prompt);
 
-    QString cmd = toPlainText().mid(lastPromtPos + prompt.length());
-    isLocked = true;
+    QString cmd = toPlainText().mid(lastPromtPos + m_prompt.length());
+    m_isLocked = true;
     historyAdd(cmd);
 
     // Если вставили несколько строк с переносом строки, то делим на команды и выполняем по очереди
     QStringList cmdList = cmd.split("\n");
     //qDebug() << cmdList << lastPromtPos;
     foreach (auto tmpCmd, cmdList) {
-        emit onCommand(tmpCmd);
+        emit command(tmpCmd);
     }
 }
 
@@ -101,7 +105,7 @@ void Console::output(const QString &s)
     //    textCursor().setBlockCharFormat(format);
     textCursor().insertText(s);
     insertPrompt();
-    isLocked = false;
+    m_isLocked = false;
 }
 
 void Console::insertPrompt(bool insertNewBlock)
@@ -111,7 +115,7 @@ void Console::insertPrompt(bool insertNewBlock)
     //    QTextCharFormat format;
     //    format.setForeground(Qt::green);
     //    textCursor().setBlockCharFormat(format);
-    textCursor().insertText(prompt);
+    textCursor().insertText(m_prompt);
     scrollDown();
 }
 
@@ -123,27 +127,27 @@ void Console::scrollDown()
 
 void Console::historyAdd(const QString &cmd)
 {
-    history->append(cmd);
-    historyPos = history->length();
+    m_history->append(cmd);
+    m_historyPos = m_history->length();
 }
 
 void Console::historyBack()
 {
-    if (!historyPos)
+    if (!m_historyPos)
         return;
 
     QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::StartOfBlock);
     cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
-    cursor.insertText(prompt + history->at(historyPos - 1));
+    cursor.insertText(m_prompt + m_history->at(m_historyPos - 1));
     setTextCursor(cursor);
-    historyPos--;
+    m_historyPos--;
 }
 
 void Console::historyForward()
 {
-    if (historyPos == history->length())
+    if (m_historyPos == m_history->length())
         return;
 
     QTextCursor cursor = textCursor();
@@ -151,13 +155,13 @@ void Console::historyForward()
     cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
 
-    if (historyPos == history->length() - 1)
-        cursor.insertText(prompt);
+    if (m_historyPos == m_history->length() - 1)
+        cursor.insertText(m_prompt);
     else
-        cursor.insertText(prompt + history->at(historyPos + 1));
+        cursor.insertText(m_prompt + m_history->at(m_historyPos + 1));
 
     setTextCursor(cursor);
-    historyPos++;
+    m_historyPos++;
 }
 
 
@@ -166,7 +170,7 @@ void Console::findLastBlock(int &first, int &last)
     QTextCursor cur = textCursor();
     cur.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
 
-    first = cur.block().position() + prompt.length();
+    first = cur.block().position() + m_prompt.length();
     last = cur.position();
 }
 

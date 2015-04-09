@@ -10,27 +10,29 @@ public:
     Console(QWidget *parent = 0);
     void output(const QString &s);
     void scrollDown();
+
 protected:
-    void keyPressEvent(QKeyEvent *);
-    void contextMenuEvent(QContextMenuEvent *);
+    void keyPressEvent(QKeyEvent *event);
+    void contextMenuEvent(QContextMenuEvent *event);
 
 private:
-    QString prompt;
-    bool isLocked;
-    QStringList *history;
-    int historyPos;
-
     void onEnter();
     void insertPrompt(bool insertNewBlock = true);
     void historyAdd(const QString &cmd);
     void historyBack();
-    void historyForward();    
+    void historyForward();
     void findLastBlock(int &first, int &last);
     bool isCursorInLastBlock(int curPos = -1);
 
+private:
+    QString m_prompt;
+    bool m_isLocked;
+    QStringList *m_history;
+    int m_historyPos;
+
 signals:
-    void onCommand(QString);
-    void onChange(QString);
+    void command(QString);
+    void commandStringChanged(QString);
 };
 
 #endif // CONSOLE_H
