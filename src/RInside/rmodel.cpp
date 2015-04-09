@@ -15,11 +15,11 @@ int RModel::rowCount(const QModelIndex &/*parent*/) const
     switch (m_object.storage())
     {
     case RObject::Frame:
-        return m_object.attrib("row.names").length();
+        return m_object.attribute("row.names").length();
     case RObject::Matrix:
         return m_object.rows();
     case RObject::Array: {
-        RObject dims = m_object.attrib("dim");
+        RObject dims = m_object.attribute("dim");
         return dims.value(0).toInt() * dims.value(2).toInt();
     }
     case RObject::Vector:
@@ -34,7 +34,7 @@ int RModel::columnCount(const QModelIndex &/*parent*/) const
     switch (m_object.storage())
     {
     case RObject::Frame:
-        return m_object.attrib("names").length();
+        return m_object.attribute("names").length();
     case RObject::Matrix:
         return m_object.columns();
     case RObject::List: {
@@ -44,7 +44,7 @@ int RModel::columnCount(const QModelIndex &/*parent*/) const
         return columns;
     }
     case RObject::Array: {
-        RObject dims = m_object.attrib("dim");
+        RObject dims = m_object.attribute("dim");
         return dims.value(1).toInt();
     }
     default:
@@ -94,7 +94,7 @@ QVariant RModel::headerData(int section, Qt::Orientation orientation, int role) 
 
     if (m_object.storage() == RObject::Frame) {
         bool o = orientation == Qt::Horizontal;
-        RObject columns = m_object.attrib(o ? "names" : "row.names");
+        RObject columns = m_object.attribute(o ? "names" : "row.names");
         return columns.value(section);
     }
 

@@ -48,8 +48,10 @@ public:
     int rows() const;
     int columns() const;
 
-    RObject attrib(const QString &name) const;
-    RObject data(int offset) const;
+    RObject attribute(const QString &name) const;
+    void setAttribute(const QString &name, RObject val);
+    RObject data(int offset = 0) const;
+    void setData(RObject val, int offset = 0);
     QVariant value(int offset = 0) const;
     void setValue(QVariant val, int offset = 0);
 

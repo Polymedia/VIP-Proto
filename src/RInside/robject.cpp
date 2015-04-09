@@ -123,7 +123,7 @@ int RObject::columns() const
     return Rf_ncols(m_object);
 }
 
-RObject RObject::attrib(const QString &name) const
+RObject RObject::attribute(const QString &name) const
 {
     SEXP rname = m_shortcuts.value(name, R_NilValue);
     if (rname == SEXP() || rname == R_NilValue)
@@ -131,9 +131,24 @@ RObject RObject::attrib(const QString &name) const
     return Rf_getAttrib(m_object, rname);
 }
 
+void RObject::setAttribute(const QString &name, RObject val)
+{
+    Shield obj(m_object);
+    SEXP rname = m_shortcuts.value(name, R_NilValue);
+    if (rname == SEXP() || rname == R_NilValue)
+        rname = Rf_mkChar(name.toUtf8().constData());
+    Rf_setAttrib(obj, rname, val);
+}
+
 RObject RObject::data(int offset) const
 {
     return plainData<SEXP>(m_object, offset);
+}
+
+void RObject::setData(RObject val, int offset)
+{
+    Shield obj(m_object);
+    plainData<SEXP>(obj, offset) = val;
 }
 
 QVariant RObject::value(int offset) const
