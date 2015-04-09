@@ -143,7 +143,8 @@ QVariant RObject::value(int offset) const
 
 void RObject::setValue(QVariant val, int offset)
 {
-    setPlain(m_object, offset, val);
+    Shield obj(m_object);
+    setPlain(obj, offset, val);
 }
 
 RObject::operator SEXP() const
