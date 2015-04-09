@@ -6,6 +6,37 @@
 #include <R_ext/RStartup.h>
 #include <R_ext/Parse.h>
 
+static QMap<QString, SEXP> createShortcuts()
+{
+    QMap<QString, SEXP> s;
+    s.insert("[[", R_Bracket2Symbol);
+    s.insert("[", R_BracketSymbol);
+    s.insert("{", R_BraceSymbol);
+    s.insert("class", R_ClassSymbol);
+    s.insert(".Device", R_DeviceSymbol);
+    s.insert("dimnames", R_DimNamesSymbol);
+    s.insert("dim", R_DimSymbol);
+    s.insert("$", R_DollarSymbol);
+    s.insert("...", R_DotsSymbol);
+    s.insert("drop", R_DropSymbol);
+    s.insert(".Last.value", R_LastvalueSymbol);
+    s.insert("levels", R_LevelsSymbol);
+    s.insert("mode", R_ModeSymbol);
+    s.insert("name", R_NameSymbol);
+    s.insert("names", R_NamesSymbol);
+    s.insert("na.rm", R_NaRmSymbol);
+    s.insert("package", R_PackageSymbol);
+    s.insert("quote", R_QuoteSymbol);
+    s.insert("row.names", R_RowNamesSymbol);
+    s.insert(".Random.seed", R_SeedsSymbol);
+    s.insert("source", R_SourceSymbol);
+    s.insert("tsp", R_TspSymbol);
+    s.insert(".defined", R_dot_defined);
+    s.insert(".Method", R_dot_Method);
+    s.insert(".target", R_dot_target);
+    return s;
+}
+
 static RConsole *R = nullptr;
 
 static int ReadConsole(const char *prompt, char *buf, int len, int /*addtohistory*/)
@@ -62,6 +93,7 @@ RConsole::RConsole(bool verbose, QObject *parent) :
     R_SetParams(&Rst);
 
     R = this;
+    RObject::m_shortcuts = createShortcuts();
 }
 
 RConsole::~RConsole()
@@ -73,7 +105,7 @@ RConsole::~RConsole()
     R = nullptr;
 }
 
-RProxy RConsole::get(const QString &name) const
+RObject RConsole::get(const QString &name) const
 {
     SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
     SEXP res = Rf_findVarInFrame(R_GlobalEnv, nameSym);
@@ -88,13 +120,13 @@ RProxy RConsole::get(const QString &name) const
     return res ;
 }
 
-void RConsole::set(const QString &name, const RProxy &var)
+void RConsole::set(const QString &name, const RObject &var)
 {
     SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
-    Rf_defineVar(nameSym, var.data(), R_GlobalEnv);
+    Rf_defineVar(nameSym, var, R_GlobalEnv);
 }
 
-bool RConsole::execute(const QString &code, RProxy& value)
+bool RConsole::execute(const QString &code, RObject& value)
 {
     ParseStatus status;
     SEXP ans, cmdSexp, cmdexpr = R_NilValue;
@@ -120,7 +152,7 @@ bool RConsole::execute(const QString &code, RProxy& value)
             } else if (m_verbose)
                 Rf_PrintValue(ans);
         }
-        value = RProxy(ans);
+        value = RObject(ans);
         break;
     case PARSE_INCOMPLETE:
         // need to read another line
