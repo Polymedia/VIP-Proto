@@ -3,6 +3,7 @@
 
 #include "rconfig.h"
 #include "robject.h"
+#include "rbind.h"
 
 #include <QObject>
 
@@ -18,8 +19,7 @@ public:
     bool verbose() const { return m_verbose; }
     void setVerbose(bool v) { m_verbose = v; }
 
-    RObject get(const QString &name) const;
-    void set(const QString &name, const RObject& var);
+    RBind operator[](const QString &name);
 
 public slots:
     bool execute(const QString& code);

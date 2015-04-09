@@ -105,25 +105,9 @@ RConsole::~RConsole()
     R = nullptr;
 }
 
-RObject RConsole::get(const QString &name) const
+RBind RConsole::operator[](const QString &name)
 {
-    SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
-    SEXP res = Rf_findVarInFrame(R_GlobalEnv, nameSym);
-
-    if(res == R_UnboundValue)
-        return R_NilValue;
-
-    /* We need to evaluate if it is a promise */
-    if(TYPEOF(res) == PROMSXP)
-        res = Rf_eval(res, R_GlobalEnv);
-
-    return res ;
-}
-
-void RConsole::set(const QString &name, const RObject &var)
-{
-    SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
-    Rf_defineVar(nameSym, var, R_GlobalEnv);
+    return RBind(name);
 }
 
 bool RConsole::execute(const QString &code)

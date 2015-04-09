@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     //Load data from csv
     CsvModel model;
     model.load("data.csv", ';', true);
-    r.set("input", RObject::fromModel(&model));
+    r["input"] = RObject::fromModel(&model);
 
     MainWindow w(&r);
     w.show();
