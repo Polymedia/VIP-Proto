@@ -71,7 +71,7 @@ QVariant RModel::data(const QModelIndex &index, int role) const
         return m_object.value(offset);
     }
     case RObject::List: {
-        RObject row = m_object.data(index.column());
+        RObject row = m_object.data(index.row());
         if (index.column() >= row.length())
             return QVariant("NaN");
         return row.value(index.column());
@@ -109,7 +109,7 @@ Qt::ItemFlags RModel::flags(const QModelIndex &index) const
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     if (m_object.storage() == RObject::List) {
-        RObject row = m_object.data(index.column());
+        RObject row = m_object.data(index.row());
         if (index.column() < row.length())
             flags |= Qt::ItemIsEditable;
     }
@@ -137,7 +137,7 @@ bool RModel::setData(const QModelIndex &index, const QVariant &value, int role)
         break;
     }
     case RObject::List: {
-        RObject row = m_object.data(index.column());
+        RObject row = m_object.data(index.row());
         row.setValue(value, index.column());
         break;
     }
