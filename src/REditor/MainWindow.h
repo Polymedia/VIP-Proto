@@ -27,6 +27,7 @@ private slots:
 
     void updatePlot();
     void printOutputBuf();
+    void onWainExtaInput();
 
 private:
     QString m_plotFilePath;
@@ -36,8 +37,10 @@ private:
 
     QString m_outputBuf;
     QString m_lastOutput;
+    // Таймер, чтобы дождаться всего вывода из консоли, если он многострочный
     QTimer m_outputTimer;
-
+    // Таймер, чтобы узнать, есть ли вывод от R или нет (некоторые команды ждут дополнительный ввод)
+    QTimer m_waitOutputTimer;
 
     Ui::MainWindow *ui;    
 };

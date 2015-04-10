@@ -5,6 +5,7 @@
 #include <QFile>
 
 #include "Console.h"
+#include <QDebug>
 
 MainWindow::MainWindow(RConsole *r, QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +21,7 @@ MainWindow::MainWindow(RConsole *r, QWidget *parent) :
     connect(m_guiConsole, SIGNAL(command(QString)), SLOT(onExecuteClicked(QString)));
     connect(ui->btnUpdatePlot, SIGNAL(clicked()), SLOT(updatePlot()));
     connect(&m_outputTimer, SIGNAL(timeout()), SLOT(printOutputBuf()));
+    connect(&m_waitOutputTimer, SIGNAL(timeout()), SLOT(onWainExtaInput()));
 
     // Tempolary file for R plots
     m_plotFilePath = "tmpPlot.png";
@@ -27,6 +29,9 @@ MainWindow::MainWindow(RConsole *r, QWidget *parent) :
 
     m_outputTimer.setInterval(50);
     m_outputTimer.setSingleShot(true);
+
+    m_waitOutputTimer.setInterval(75);
+    m_waitOutputTimer.setSingleShot(true);
 }
 
 MainWindow::~MainWindow()
@@ -45,6 +50,8 @@ void MainWindow::onExecuteClicked(const QString &command)
     connect(m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
     connect(m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
 
+    m_waitOutputTimer.start();
+
     m_rconsole->execute(command);
 
     disconnect(m_rconsole, 0, this, 0);
@@ -53,14 +60,20 @@ void MainWindow::onExecuteClicked(const QString &command)
 
 void MainWindow::onRMessageOk(const QString &message)
 {
+    m_waitOutputTimer.stop();
+
     m_outputBuf.append(message);
     m_outputTimer.start();
 }
 
 void MainWindow::onRMessageError(const QString &message)
 {
-    if (message != m_outputBuf && message != m_lastOutput)
-        m_guiConsole->output(message);
+    m_waitOutputTimer.stop();
+
+    if (message != m_outputBuf && message != m_lastOutput) {
+        m_outputBuf.append(message);
+        printOutputBuf();
+    }
 }
 
 void MainWindow::updatePlot()
@@ -78,4 +91,9 @@ void MainWindow::printOutputBuf()
     m_guiConsole->output(m_outputBuf);
     m_lastOutput = m_outputBuf;
     m_outputBuf.clear();
+}
+
+void MainWindow::onWainExtaInput()
+{
+    m_guiConsole->extraInput();
 }

@@ -5,11 +5,13 @@
 
 #include <QMenu>
 
+QString const Console::m_prompt = "> ";
+QString const Console::m_ExtraPrompt = "+ ";
+int const Console::m_historyCount = 500;
+
 Console::Console(QWidget *parent) :
     QPlainTextEdit(parent)
 {
-    m_prompt = "> ";
-
     m_history = new QStringList;
     m_historyPos = 0;
     insertPrompt(false);
@@ -36,7 +38,7 @@ void Console::keyPressEvent(QKeyEvent *event)
             break;
         }
         case Qt::Key_Right: {
-                QPlainTextEdit::keyPressEvent(event);
+            QPlainTextEdit::keyPressEvent(event);
             break;
         }
 
@@ -94,11 +96,17 @@ void Console::onEnter()
 
     QString cmd = toPlainText().mid(lastPromtPos + m_prompt.length());
     m_isLocked = true;
-    historyAdd(cmd);
 
     // Если вставили несколько строк с переносом строки, то делим на команды и выполняем по очереди
     QStringList cmdList = cmd.split("\n");
     foreach (auto tmpCmd, cmdList) {
+        // КОСТЫЛЬ?
+        // Разобраться как работать с многострочными командами в истории
+
+        if (tmpCmd.startsWith(m_ExtraPrompt))
+            tmpCmd.remove(0, m_ExtraPrompt.length());
+
+        historyAdd(tmpCmd);
         emit command(tmpCmd);
     }
 }
@@ -111,11 +119,20 @@ void Console::output(const QString &s)
     m_isLocked = false;
 }
 
-void Console::insertPrompt(bool insertNewBlock)
+void Console::extraInput()
+{
+    insertPrompt(false, false);
+    m_isLocked = false;
+}
+
+void Console::insertPrompt(bool insertNewBlock, bool dafaultPromt)
 {
     if (insertNewBlock)
         textCursor().insertBlock();
-    textCursor().insertText(m_prompt);
+    if (dafaultPromt)
+        textCursor().insertText(m_prompt);
+    else
+        textCursor().insertText("\n" + m_ExtraPrompt);
     scrollDown();
 }
 
@@ -128,6 +145,10 @@ void Console::scrollDown()
 void Console::historyAdd(const QString &cmd)
 {
     m_history->append(cmd);
+
+    if (m_history->size() > m_historyCount)
+        m_history->removeFirst();
+
     m_historyPos = m_history->length();
 }
 
