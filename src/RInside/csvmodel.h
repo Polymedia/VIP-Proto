@@ -1,4 +1,4 @@
-﻿#ifndef CSVMODEL_H
+#ifndef CSVMODEL_H
 #define CSVMODEL_H
 
 #include "rconfig.h"

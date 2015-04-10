@@ -1,4 +1,4 @@
-﻿#ifndef ROBJECT_H
+#ifndef ROBJECT_H
 #define ROBJECT_H
 
 #include "rconfig.h"

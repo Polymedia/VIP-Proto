@@ -1,4 +1,4 @@
-﻿#ifndef RBIND_H
+#ifndef RBIND_H
 #define RBIND_H
 
 #include "rconfig.h"

@@ -1,4 +1,4 @@
-﻿#include "robject.h"
+#include "robject.h"
 #include "rmodel.h"
 #include "shield.h"
 

@@ -1,4 +1,4 @@
-﻿#ifndef RMODEL_H
+#ifndef RMODEL_H
 #define RMODEL_H
 
 #include "rconfig.h"

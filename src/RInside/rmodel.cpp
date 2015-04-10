@@ -1,4 +1,4 @@
-﻿#include "rmodel.h"
+#include "rmodel.h"
 
 RModel::RModel(const RObject &object, QObject *parent) :
     QAbstractTableModel(parent),

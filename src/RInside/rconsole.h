@@ -1,4 +1,4 @@
-﻿#ifndef RCONSOLE_H
+#ifndef RCONSOLE_H
 #define RCONSOLE_H
 
 #include "rconfig.h"

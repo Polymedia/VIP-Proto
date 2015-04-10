@@ -1,4 +1,4 @@
-﻿#include "shield.h"
+#include "shield.h"
 
 #define USE_RINTERNALS
 #include <Rinternals.h>
