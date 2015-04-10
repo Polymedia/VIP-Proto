@@ -6,8 +6,6 @@
 #include <R_ext/RStartup.h>
 #include <R_ext/Parse.h>
 
-#include <QDebug>
-
 static RConsole *R = nullptr;
 
 static int ReadConsole(const char *prompt, char *buf, int len, int /*addtohistory*/)
@@ -17,7 +15,7 @@ static int ReadConsole(const char *prompt, char *buf, int len, int /*addtohistor
     if(fgets(buf, len, stdin)) return 1; else return 0;
 }
 
-static void WriteConsole(const char *buf, int len)
+static void WriteConsole(const char *buf, int /*len*/)
 {
     //printf("%s", buf);
     R->write(buf);
@@ -106,8 +104,6 @@ bool RConsole::execute(const QString &code, RProxy& value)
 
     cmdexpr = PROTECT(R_ParseVector(cmdSexp, -1, &status, R_NilValue));
 
-
-
     switch (status)
     {
     case PARSE_OK:
@@ -115,11 +111,8 @@ bool RConsole::execute(const QString &code, RProxy& value)
         for(int i = 0; i < Rf_length(cmdexpr); i++) {
             int errorOccurred;
             ans = R_tryEval(VECTOR_ELT(cmdexpr, i), R_GlobalEnv, &errorOccurred);
-            //qDebug() << "TRY" << Rf_isNull(ans) << TYPEOF(ans);
             if (errorOccurred) {
-                //qDebug() << "BUF0";
                 QString evalError = R_curErrorBuf();
-                //qDebug() << "BUF";
                 emit error(evalError);
 
                 UNPROTECT(2);
