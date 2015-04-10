@@ -1,4 +1,4 @@
-!include( ../!include_common.pri ) {
+﻿!include( ../!include_common.pri ) {
     error("Couldn't find the !include_common.pri file!")
 }
 

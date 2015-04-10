@@ -1,4 +1,4 @@
-#include "csvmodel.h"
+﻿#include "csvmodel.h"
 
 #include <QFile>
 #include <QTextStream>

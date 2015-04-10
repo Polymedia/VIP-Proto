@@ -1,4 +1,4 @@
-#ifndef RSHIELD_H
+﻿#ifndef RSHIELD_H
 #define RSHIELD_H
 
 #include "rconfig.h"

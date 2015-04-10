@@ -1,4 +1,4 @@
-#ifndef RCONFIG_H
+﻿#ifndef RCONFIG_H
 #define RCONFIG_H
 
 #include <QtGlobal>
