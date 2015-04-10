@@ -11,6 +11,8 @@ public:
     CsvModel(QObject *parent = 0);
     ~CsvModel();
 
+    //delim - разделяющий символ
+    //headers - интерпретировать первую строку как названи¤ столбцов
     bool load(const QString &filename, const QChar &delim, bool headers = false);
 
     int rowCount(const QModelIndex &parent) const;

@@ -24,22 +24,6 @@ static QMetaType::Type guessType(const QString &value)
     return QMetaType::QString;
 }
 
-static QVariant toVariant(QMetaType::Type type, const QString &value)
-{
-    switch (type) {
-    case QMetaType::Bool:
-        return QVariant(value).toBool();
-    case QMetaType::Int:
-        return value.toInt();
-    case QMetaType::Float:
-        return value.toFloat();
-    case QMetaType::QString:
-        return value;
-    default:
-        return QVariant();
-    }
-}
-
 CsvModel::CsvModel(QObject *parent) :
     QAbstractTableModel(parent),
     m_rowCount(0),
@@ -86,13 +70,23 @@ bool CsvModel::load(const QString &filename, const QChar &delim, bool headers)
         types[i] = guessType(value);
     }
 
+    qint64 lineCount = headers ? 0 : 1;
     while (!in.atEnd()) {
+        lineCount++;
         QString line = in.readLine();
         QStringList values = line.split(delim);
         for (int i = 0; i < values.size(); ++i) {
             QString value = values[i];
             value = value.simplified();
-            QVariant data = toVariant(types[i], value);
+            QVariant data(value);
+
+            //Check if value can be converted
+            if (!data.convert(types[i])) {
+                QString warn("Error (line %1): %2 cannot be converted to %3");
+                warn = warn.arg(lineCount).arg(value).arg(QMetaType::typeName(types[i]));
+                qWarning() << warn;
+            }
+
             m_data.append(data);
         }
     }
