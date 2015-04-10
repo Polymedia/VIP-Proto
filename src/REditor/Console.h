@@ -29,9 +29,10 @@ private:
     void setEditing(bool allow);
 
 private:
-    QString m_prompt;
+    static const QString m_prompt;
     bool m_isLocked;
     QStringList *m_history;
+    static const int m_historyCount;
     int m_historyPos;
 
 signals:

@@ -5,11 +5,12 @@
 
 #include <QMenu>
 
+QString const Console::m_prompt = "> ";
+int const Console::m_historyCount = 500;
+
 Console::Console(QWidget *parent) :
     QPlainTextEdit(parent)
 {
-    m_prompt = "> ";
-
     m_history = new QStringList;
     m_historyPos = 0;
     insertPrompt(false);
@@ -128,6 +129,10 @@ void Console::scrollDown()
 void Console::historyAdd(const QString &cmd)
 {
     m_history->append(cmd);
+
+    if (m_history->size() > m_historyCount)
+        m_history->removeFirst();
+
     m_historyPos = m_history->length();
 }
 
