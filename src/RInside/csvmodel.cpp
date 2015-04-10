@@ -1,4 +1,4 @@
-#include "csvmodel.h"
+﻿#include "csvmodel.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -35,13 +35,9 @@ CsvModel::~CsvModel()
 {
 }
 
-bool CsvModel::load(const QString &filename, const QChar &delim, bool headers)
+bool CsvModel::load(QIODevice *device, const QChar &delim, bool headers)
 {
-    QFile file(filename);
-    if (!file.open(QFile::ReadOnly))
-        return false;
-
-    QTextStream in(&file);
+    QTextStream in(device);
 
     //Get column names
     if (headers) {
@@ -92,7 +88,6 @@ bool CsvModel::load(const QString &filename, const QChar &delim, bool headers)
     }
 
     m_rowCount = m_data.size() / m_columnCount;
-    file.close();
 
     return true;
 }

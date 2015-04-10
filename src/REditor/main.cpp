@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QDebug>
 
 #include <rconsole.h>
 #include <rmodel.h>
@@ -16,10 +17,17 @@ int main(int argc, char *argv[])
     //Load data from csv
     QDir inputs("inputs");
     int counter = 0;
-    foreach (QString file, inputs.entryList(QStringList() << "*.csv")) {
+    foreach (QString filename, inputs.entryList(QStringList() << "*.csv")) {
         counter++;
         CsvModel model;
-        model.load(inputs.absoluteFilePath(file), ';', true);
+
+        QFile file(inputs.absoluteFilePath(filename));
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning() << "Cannot open input data file";
+            continue;
+        }
+
+        model.load(&file, ';', true);
         r["input" + QString::number(counter)] = RObject::fromModel(&model);
     }
 

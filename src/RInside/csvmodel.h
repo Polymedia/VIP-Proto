@@ -1,4 +1,4 @@
-#ifndef CSVMODEL_H
+﻿#ifndef CSVMODEL_H
 #define CSVMODEL_H
 
 #include "rconfig.h"
@@ -13,7 +13,7 @@ public:
 
     //delim - разделяющий символ
     //headers - интерпретировать первую строку как названи¤ столбцов
-    bool load(const QString &filename, const QChar &delim, bool headers = false);
+    bool load(QIODevice *device, const QChar &delim, bool headers = false);
 
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
