@@ -12,9 +12,9 @@ static QMetaType::Type guessType(const QString &value)
     if (ok)
         return QMetaType::Int;
 
-    value.toFloat(&ok);
+    value.toDouble(&ok);
     if (ok)
-        return QMetaType::Float;
+        return QMetaType::Double;
 
     QRegExp exp("(true|false)");
     ok = exp.exactMatch(value);
@@ -22,6 +22,13 @@ static QMetaType::Type guessType(const QString &value)
         return QMetaType::Bool;
 
     return QMetaType::QString;
+}
+
+static bool emptyLine(const QString &line)
+{
+    int spaces = line.count(' ');
+    int tabs = line.count('\t');
+    return line.isEmpty() || (spaces + tabs) == line.size();
 }
 
 CsvModel::CsvModel(QObject *parent) :
@@ -53,7 +60,9 @@ bool CsvModel::load(QIODevice *device, const QChar &delim, bool headers)
 
     //Read first line
     qint64 prevPos = in.pos();
-    QString firstLine = in.readLine();
+    QString firstLine;
+    while (emptyLine(firstLine) && !in.atEnd())
+        firstLine = in.readLine();
     QStringList values = firstLine.split(delim);
     m_columnCount = values.size();
     in.seek(prevPos);
@@ -70,13 +79,21 @@ bool CsvModel::load(QIODevice *device, const QChar &delim, bool headers)
     while (!in.atEnd()) {
         lineCount++;
         QString line = in.readLine();
+        if (emptyLine(line))
+            continue;
+
         QStringList values = line.split(delim);
-        for (int i = 0; i < values.size(); ++i) {
-            QString value = values[i];
+        for (int i = 0; i < m_columnCount; ++i) {
+            QString value = values.value(i, QString());
             value = value.simplified();
-            QVariant data(value);
+
+            if (value.isNull()) {
+                m_data.append(QVariant(types[i], nullptr));
+                continue;
+            }
 
             //Check if value can be converted
+            QVariant data(value);
             if (!data.convert(types[i])) {
                 QString warn("Error (line %1): %2 cannot be converted to %3");
                 warn = warn.arg(lineCount).arg(value).arg(QMetaType::typeName(types[i]));
@@ -117,7 +134,7 @@ QVariant CsvModel::headerData(int section, Qt::Orientation orientation, int role
         return QVariant();
 
     if (orientation == Qt::Horizontal)
-        return m_columnNames[section];
+        return m_columnNames.value(section, "");
     else
         return section;
 }

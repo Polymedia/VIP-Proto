@@ -70,6 +70,7 @@ static int rType(int type)
     {
     case QMetaType::Bool: return LGLSXP;
     case QMetaType::Int: return INTSXP;
+    case QMetaType::Double: return REALSXP;
     case QMetaType::Float: return REALSXP;
     case QMetaType::QPointF: return CPLXSXP;
     case QMetaType::QString: return STRSXP;
