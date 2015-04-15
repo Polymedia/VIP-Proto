@@ -7,7 +7,10 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    HttpListener *listener=new HttpListener(new QSettings() ,new HttpRequestHandler(&a) ,&a);
+    QString configFileName("listenerSettings.ini");
+    QSettings* listenerSettings = new QSettings(configFileName, QSettings::IniFormat, &a);
+    listenerSettings->beginGroup("listener");
+    HttpListener *listener = new HttpListener(listenerSettings, new HttpRequestHandler(&a) ,&a);
 
     return a.exec();
 }
