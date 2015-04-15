@@ -19,10 +19,7 @@ win32:DEFINES += Win32
 # Qt
 QT += core
 
-# R
-R_HOME = $$system(R RHOME)
-
-INCLUDEPATH += $$R_HOME/include
+INCLUDEPATH += $$DEP_INCLUDE/R
 LIBS += -L$$DEP_LIB/R -lR
 
 ###########################
