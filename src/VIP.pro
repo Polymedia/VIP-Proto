@@ -6,10 +6,14 @@ TEMPLATE = subdirs
 
 SUBDIRS = \
     RInside \
-    REditor
+    REditor \
+    RServer
 
 REditor.depends += \
     RInside
+
+REditor.depends += \
+    RServer
     
 CONFIG(INCLUDE_TESTS) {
     SUBDIRS += Tests
@@ -18,5 +22,6 @@ CONFIG(INCLUDE_TESTS) {
 
     Tests.depends += \
         RInside \
-        REditor
+        REditor \
+        RServer
 } 
