@@ -8,7 +8,8 @@
 
 TEMPLATE = lib
 
-TARGET = RInside
+DEBUG_TARGET = RInsided
+RELEASE_TARGET = RInside
 
 DEFINES += RINSIDE_LIBRARY
 win32:DEFINES += Win32
@@ -26,13 +27,16 @@ LIBS += -L$$DEP_LIB/R -lR
 ###    SETUP OUTPUT     ###
 ###########################
 
-DESTDIR = $$LIB/RInside
-
-###########################
-###        DEPLOY       ###
-###########################
-
+DESTDIR = $$LIB/$$RELEASE_TARGET
 DLLDESTDIR = $$BIN/REditor
+
+CONFIG(debug, debug|release){
+    TARGET = $$DEBUG_TARGET
+}
+
+CONFIG(release, debug|release){
+    TARGET = $$RELEASE_TARGET
+}
 
 ###########################
 ###       SOURCE        ###

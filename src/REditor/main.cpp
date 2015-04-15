@@ -4,9 +4,9 @@
 #include <QDir>
 #include <QDebug>
 
-#include <rconsole.h>
-#include <rmodel.h>
-#include <csvmodel.h>
+#include <RInside/rconsole.h>
+#include <RInside/rmodel.h>
+#include <RInside/csvmodel.h>
 
 int main(int argc, char *argv[])
 {
