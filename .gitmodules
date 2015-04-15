@@ -1,0 +1,4 @@
+[submodule "contribs/common"]
+	path = contribs/common
+	url = git@github.com:Polymedia/CommonContribs.git
+	branch = master
