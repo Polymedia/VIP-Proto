@@ -1,7 +1,8 @@
 #include <QCoreApplication>
 
 #include <httpserver/httplistener.h>
-#include <httpserver/httprequesthandler.h>
+
+#include "RequestHandler.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,7 +11,7 @@ int main(int argc, char *argv[])
     QString configFileName("listenerSettings.ini");
     QSettings* listenerSettings = new QSettings(configFileName, QSettings::IniFormat, &a);
     listenerSettings->beginGroup("listener");
-    HttpListener *listener = new HttpListener(listenerSettings, new HttpRequestHandler(&a) ,&a);
+    HttpListener *listener = new HttpListener(listenerSettings, new RequestHandler(&a) ,&a);
 
     return a.exec();
 }
