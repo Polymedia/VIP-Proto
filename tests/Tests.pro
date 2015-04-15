@@ -1,6 +1,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \	
-    Example
+    Example \
+    RInside
 
 Example.file   = Example/tst_Example.pro
+RInside.file   = RInside/tst_RInside.pro
