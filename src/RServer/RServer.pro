@@ -51,5 +51,9 @@ DLLDESTDIR = $$BIN/RServer
 ###       SOURCE        ###
 ###########################
 
-HEADERS += *.h
-SOURCES += *.cpp
+HEADERS += *.h \
+    controllers/JsonTableController.h \
+    controllers/JsonDataLoader.h
+SOURCES += *.cpp \
+    controllers/JsonTableController.cpp \
+    controllers/JsonDataLoader.cpp
