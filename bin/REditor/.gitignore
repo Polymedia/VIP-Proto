@@ -1,4 +1,7 @@
-*.exe
-*.dll
-*.manifest
-*.pdb
+/*.exe
+/*.manifest
+/*.pdb
+/REditord.*
+
+/RInside.dll
+/RInsided.dll

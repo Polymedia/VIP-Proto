@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include <rconsole.h>
+#include <RInside/rconsole.h>
 #include <QFile>
 
 #include "Console.h"

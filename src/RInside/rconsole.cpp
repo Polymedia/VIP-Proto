@@ -6,6 +6,37 @@
 #include <R_ext/RStartup.h>
 #include <R_ext/Parse.h>
 
+static QMap<QString, SEXP> createShortcuts()
+{
+    QMap<QString, SEXP> s;
+    s.insert("[[", R_Bracket2Symbol);
+    s.insert("[", R_BracketSymbol);
+    s.insert("{", R_BraceSymbol);
+    s.insert("class", R_ClassSymbol);
+    s.insert(".Device", R_DeviceSymbol);
+    s.insert("dimnames", R_DimNamesSymbol);
+    s.insert("dim", R_DimSymbol);
+    s.insert("$", R_DollarSymbol);
+    s.insert("...", R_DotsSymbol);
+    s.insert("drop", R_DropSymbol);
+    s.insert(".Last.value", R_LastvalueSymbol);
+    s.insert("levels", R_LevelsSymbol);
+    s.insert("mode", R_ModeSymbol);
+    s.insert("name", R_NameSymbol);
+    s.insert("names", R_NamesSymbol);
+    s.insert("na.rm", R_NaRmSymbol);
+    s.insert("package", R_PackageSymbol);
+    s.insert("quote", R_QuoteSymbol);
+    s.insert("row.names", R_RowNamesSymbol);
+    s.insert(".Random.seed", R_SeedsSymbol);
+    s.insert("source", R_SourceSymbol);
+    s.insert("tsp", R_TspSymbol);
+    s.insert(".defined", R_dot_defined);
+    s.insert(".Method", R_dot_Method);
+    s.insert(".target", R_dot_target);
+    return s;
+}
+
 static RConsole *R = nullptr;
 
 static int ReadConsole(const char *prompt, char *buf, int len, int /*addtohistory*/)
@@ -62,6 +93,7 @@ RConsole::RConsole(bool verbose, QObject *parent) :
     R_SetParams(&Rst);
 
     R = this;
+    RObject::m_shortcuts = createShortcuts();
 }
 
 RConsole::~RConsole()
@@ -73,28 +105,12 @@ RConsole::~RConsole()
     R = nullptr;
 }
 
-RProxy RConsole::get(const QString &name) const
+RBind RConsole::operator[](const QString &name)
 {
-    SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
-    SEXP res = Rf_findVarInFrame(R_GlobalEnv, nameSym);
-
-    if(res == R_UnboundValue)
-        return R_NilValue;
-
-    /* We need to evaluate if it is a promise */
-    if(TYPEOF(res) == PROMSXP)
-        res = Rf_eval(res, R_GlobalEnv);
-
-    return res ;
+    return RBind(name);
 }
 
-void RConsole::set(const QString &name, const RProxy &var)
-{
-    SEXP nameSym = Rf_install(name.toLocal8Bit().constData());
-    Rf_defineVar(nameSym, var.data(), R_GlobalEnv);
-}
-
-bool RConsole::execute(const QString &code, RProxy& value)
+bool RConsole::execute(const QString &code)
 {
     ParseStatus status;
     SEXP ans, cmdSexp, cmdexpr = R_NilValue;
@@ -120,32 +136,26 @@ bool RConsole::execute(const QString &code, RProxy& value)
             } else if (m_verbose)
                 Rf_PrintValue(ans);
         }
-        value = RProxy(ans);
-        break;
+        UNPROTECT(2);
+        return true;
     case PARSE_INCOMPLETE:
-        // need to read another line
+        emit error(QString("Parse error (%1): parse is incomplete").arg(status));
         break;
     case PARSE_NULL:
-        emit error(QString("ParseStatus is null (%1)").arg(status));
-        UNPROTECT(2);
-        return false;
+        emit error(QString("Parse error (%1): parse is null").arg(status));
         break;
     case PARSE_ERROR:
-        emit error(QString("Parse Error: \"%1\"").arg(code));
-        UNPROTECT(2);
-        return false;
+        emit error(QString("Parse error (%1): \"%2\"").arg(status).arg(code));
         break;
     case PARSE_EOF:
-        emit error(QString("ParseStatus is eof"));
+        emit error(QString("Parse error (%1): end of file"));
         break;
     default:
-        emit error(QString("ParseStatus is not documented"));
-        UNPROTECT(2);
-        return false;
+        emit error(QString("Parse error (%1): not documented"));
         break;
     }
 
     UNPROTECT(2);
-    return true;
+    return false;
 }
 

@@ -1,4 +1,4 @@
-*.exe
-*.dll
-*.manifest
-*.pdb
+/*.exe
+/*.dll
+/*.manifest
+/*.pdb
