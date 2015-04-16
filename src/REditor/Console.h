@@ -9,6 +9,7 @@ class Console : public QPlainTextEdit
 public:
     Console(QWidget *parent = 0);
     void output(const QString &s);
+    void extraInput();
     void scrollDown();
 
 protected:
@@ -20,7 +21,7 @@ private slots:
     void onEnter();
 
 private:
-    void insertPrompt(bool insertNewBlock = true);
+    void insertPrompt(bool insertNewBlock = true, bool dafaultPromt = true);
     void historyAdd(const QString &cmd);
     void historyBack();
     void historyForward();
@@ -30,6 +31,7 @@ private:
 
 private:
     static const QString m_prompt;
+    static const QString m_ExtraPrompt;
     bool m_isLocked;
     QStringList *m_history;
     static const int m_historyCount;
