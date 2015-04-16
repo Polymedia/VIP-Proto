@@ -8,7 +8,8 @@
 
 TEMPLATE = app
 
-TARGET = REditor
+DEBUG_TARGET = REditord
+RELEASE_TARGET = REditor
 
 ###########################
 ###      LINK LIBS      ###
@@ -16,21 +17,31 @@ TARGET = REditor
 # Qt
 QT += core gui widgets
 
-# R Inside
-INCLUDEPATH += $$SRC/RInside
+CONFIG(debug, debug|release){
+    LIBS += -lRInsided
+}
+
+CONFIG(release, debug|release){
+    LIBS += -lRInside
+}
+
 LIBS += -L"$$LIB/RInside"
-LIBS += -lRInside
+INCLUDEPATH += $$SRC
 
 ###########################
 ###    SETUP OUTPUT     ###
 ###########################
 
-DESTDIR = $$BIN/REditor
-DLLDESTDIR = $$BIN/REditor
+DESTDIR = $$BIN/$$RELEASE_TARGET
 
-###########################
-###        DEPLOY       ###
-###########################
+CONFIG(debug, debug|release){
+    TARGET = $$DEBUG_TARGET
+}
+
+CONFIG(release, debug|release){
+    TARGET = $$RELEASE_TARGET
+}
+
 
 ###########################
 ###       SOURCE        ###

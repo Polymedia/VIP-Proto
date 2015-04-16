@@ -11,7 +11,6 @@ Visiology Intelligence Platform
 
 1. Add R to system path
    - Ex: (R installed in c:\R-3.1.3\, add following line to your path: c:\R-3.1.3\bin\i386\)
-2. Copy headers from dep/include/R to $$R_HOME/include
 
 ## Run
 
