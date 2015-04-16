@@ -138,7 +138,7 @@ bool RConsole::execute(const QString &code)
         UNPROTECT(2);
         return true;
     case PARSE_INCOMPLETE:
-        emit error(QString("Parse error (%1): parse is incomplete").arg(status));
+        emit parseIncomplete(code);
         break;
     case PARSE_NULL:
         emit error(QString("Parse error (%1): parse is null").arg(status));

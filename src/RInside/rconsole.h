@@ -29,6 +29,7 @@ signals:
     void callback();
     void busy(bool);
     void error(QString);
+    void parseIncomplete(QString);
 
 private:
     friend int ReadConsole(const char *, char *, int, int);
