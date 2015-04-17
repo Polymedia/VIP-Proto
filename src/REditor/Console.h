@@ -9,6 +9,7 @@ class Console : public QPlainTextEdit
 public:
     Console(QWidget *parent = 0);
     void output(const QString &s);
+    void extraInput();
     void scrollDown();
 
 protected:
@@ -27,13 +28,17 @@ private:
     void findLastBlock(int &first, int &last);
     bool isCursorInLastBlock(int curPos = -1);
     void setEditing(bool allow);
+    void clearCurrentBlock();
 
 private:
-    static const QString m_prompt;
-    bool m_isLocked;
+    static const QString m_defaultPrompt;
+    static const QString m_ExtraPrompt;
+    QString m_currentPromt;
     QStringList *m_history;
     static const int m_historyCount;
     int m_historyPos;
+
+    bool m_isExtra;
 
 signals:
     void command(QString);

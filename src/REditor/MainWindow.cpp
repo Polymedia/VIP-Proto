@@ -1,10 +1,11 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include <rconsole.h>
+#include <RInside/rconsole.h>
 #include <QFile>
 
 #include "Console.h"
+#include <QDebug>
 
 MainWindow::MainWindow(RConsole *r, QWidget *parent) :
     QMainWindow(parent),
@@ -44,6 +45,7 @@ void MainWindow::onExecuteClicked(const QString &command)
 
     connect(m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
     connect(m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
+    connect(m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
 
     m_rconsole->execute(command);
 
@@ -59,8 +61,15 @@ void MainWindow::onRMessageOk(const QString &message)
 
 void MainWindow::onRMessageError(const QString &message)
 {
-    if (message != m_outputBuf && message != m_lastOutput)
-        m_guiConsole->output(message);
+    if (message != m_outputBuf && message != m_lastOutput) {
+        m_outputBuf.append(message);
+        printOutputBuf();
+    }
+}
+
+void MainWindow::onRParseIncomplete()
+{
+    m_guiConsole->extraInput();
 }
 
 void MainWindow::updatePlot()

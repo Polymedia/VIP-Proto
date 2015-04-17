@@ -24,6 +24,7 @@ private slots:
 
     void onRMessageOk(const QString &message);
     void onRMessageError(const QString &message);
+    void onRParseIncomplete();
 
     void updatePlot();
     void printOutputBuf();
@@ -36,8 +37,8 @@ private:
 
     QString m_outputBuf;
     QString m_lastOutput;
+    // Таймер, чтобы дождаться всего вывода из консоли, если он многострочный
     QTimer m_outputTimer;
-
 
     Ui::MainWindow *ui;    
 };

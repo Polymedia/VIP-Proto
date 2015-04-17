@@ -1,7 +1,7 @@
 #ifndef RCONFIG_H
 #define RCONFIG_H
 
-#include <QtCore/QtGlobal>
+#include <QtGlobal>
 
 #if defined(RINSIDE_LIBRARY)
 #  define RINSIDE_EXPORT Q_DECL_EXPORT

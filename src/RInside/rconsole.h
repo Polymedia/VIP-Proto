@@ -2,7 +2,8 @@
 #define RCONSOLE_H
 
 #include "rconfig.h"
-#include "rproxy.h"
+#include "robject.h"
+#include "rbind.h"
 
 #include <QObject>
 
@@ -18,17 +19,17 @@ public:
     bool verbose() const { return m_verbose; }
     void setVerbose(bool v) { m_verbose = v; }
 
-    RProxy get(const QString &name) const;
-    void set(const QString &name, const RProxy& var);
+    RBind operator[](const QString &name);
 
 public slots:
-    bool execute(const QString& code, RProxy& value = RProxy());
+    bool execute(const QString& code);
 
 signals:
     void write(QString);
     void callback();
     void busy(bool);
     void error(QString);
+    void parseIncomplete(QString);
 
 private:
     friend int ReadConsole(const char *, char *, int, int);
