@@ -27,30 +27,34 @@ void Console::keyPressEvent(QKeyEvent *event)
     if (!isCursorInLastBlock())
         return;
 
+    bool isProcessed = false;
     if (event->modifiers() == Qt::NoModifier) {
         switch (event->key()) {
-        case Qt::Key_Return: onEnter(); break;
-        case Qt::Key_Up: historyBack(); break;
-        case Qt::Key_Down: historyForward(); break;
-
+        case Qt::Key_Return: onEnter(); isProcessed = true; break;
+        case Qt::Key_Up: historyBack(); isProcessed = true ;break;
+        case Qt::Key_Down: historyForward(); isProcessed = true; break;
         case Qt::Key_Left: {
             if (textCursor().positionInBlock() > m_currentPromt.length())
                 QPlainTextEdit::keyPressEvent(event);
+            isProcessed = true;
             break;
         }
         case Qt::Key_Right: {
             QPlainTextEdit::keyPressEvent(event);
+            isProcessed = true;
             break;
         }
 
         case Qt::Key_Backspace: {
             if (textCursor().positionInBlock() > m_currentPromt.length())
                 QPlainTextEdit::keyPressEvent(event);
+            isProcessed = true;
             break;
         }
         case Qt::Key_Delete: {
             if (textCursor().positionInBlock() >= m_currentPromt.length())
                 QPlainTextEdit::keyPressEvent(event);
+            isProcessed = true;
             break;
         }
         }
@@ -58,7 +62,7 @@ void Console::keyPressEvent(QKeyEvent *event)
 
     // Обработчик нажатий видимых символов
     if ((event->modifiers() == Qt::NoModifier || event->modifiers() == Qt::ShiftModifier)
-            && !event->text().isNull() && event->key() && (event->key() != Qt::Key_Return))
+            && !event->text().isNull() && event->key() && !isProcessed)
         QPlainTextEdit::keyPressEvent(event);
 
     QString cmd = textCursor().block().text().mid(m_currentPromt.length());
