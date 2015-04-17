@@ -57,8 +57,8 @@ void Console::keyPressEvent(QKeyEvent *event)
     }
 
     // Обработчик нажатий видимых символов
-    if (event->key() >= 0x20 && event->key() <= 0x7e
-            && (event->modifiers() == Qt::NoModifier || event->modifiers() == Qt::ShiftModifier))
+    if ((event->modifiers() == Qt::NoModifier || event->modifiers() == Qt::ShiftModifier)
+            && !event->text().isNull() && event->key() && (event->key() != Qt::Key_Return))
         QPlainTextEdit::keyPressEvent(event);
 
     QString cmd = textCursor().block().text().mid(m_currentPromt.length());
