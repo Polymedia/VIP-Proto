@@ -61,7 +61,7 @@ void MainWindow::onRMessageOk(const QString &message)
 
 void MainWindow::onRMessageError(const QString &message)
 {
-    if (message != m_outputBuf && message != m_lastOutput) {
+    if (message != m_outputBuf) {
         m_outputBuf.append(message);
         printOutputBuf();
     }
