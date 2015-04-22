@@ -13,14 +13,6 @@ public:
 
     bool loadData(const QString &fileName);
 
-    QByteArray data() const;
-    QByteArray table(QByteArray tableName);
-    QByteArray value(QByteArray tableName, QByteArray valueName);
-
-
-    bool containsTable(QByteArray tableName);
-    bool containsValue(QByteArray tableName, QByteArray valueName);
-
     QByteArray get(const QByteArrayList &pathList);
     bool set(const QByteArrayList &pathList, const QByteArray &value);
 

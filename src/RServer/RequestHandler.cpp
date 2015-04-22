@@ -2,39 +2,24 @@
 
 #include "controllers/JsonTableController.h"
 
-RequestHandler::RequestHandler(QObject *parent) : HttpRequestHandler(parent)
+RequestHandler::RequestHandler(QObject *parent) :
+    HttpRequestHandler(parent),
+    m_jsonTableController(new JsonTableController)
 {
+    m_jsonTableController->loadData();
 }
 
 RequestHandler::~RequestHandler()
 {
+    delete m_jsonTableController;
 }
 
 void RequestHandler::service(HttpRequest &request, HttpResponse &response)
 {
-//    QByteArray path = request.getPath();
-//    QByteArrayList pathList = path.split('/');
-//    if (pathList.last().isEmpty())
-//        pathList.removeLast();
-
-//    qDebug("Conroller: path=%s", path.data());
-
-//    if (pathList.at(1) == "tables") {
-////        // Set a response header
-////        response.setHeader("Content-Type", "text/html; charset=ISO-8859-1");
-
-////        // Return a simple HTML document
-////        response.write("<html><body><b>TABLES</b></body></html>", true);
-//        qDebug() << "pathList 1" << pathList;
-//        pathList.removeFirst();
-//        pathList.removeFirst();
-//        qDebug() << "pathList 2" << pathList;
-
-//        JsonTableController().service(request, response, pathList);
-//    } else {
-//        HttpRequestHandler::service(request, response);
-//    }
-
+//    qDebug() << "getMethod" << request.getMethod();
+//    qDebug() << "getPath" << request.getPath();
+//    qDebug() << "getBody" << request.getBody();
+//    qDebug() << "getParameterMap" << request.getParameterMap();
 
     QByteArray path = request.getPath();
     QByteArrayList pathList = path.split('/');
@@ -43,8 +28,11 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
 
     pathList.removeFirst();
 
-    if (pathList.at(0) == "tables") {
-        JsonTableController().service(request, response, pathList);
+    // Первый параметр отвечает за версию протокола
+    if (pathList.length() > 1 && pathList.at(1) == "widgets") {
+        // TODO: Сделать абстрактный класс
+        m_jsonTableController->setPathList(pathList);
+        m_jsonTableController->service(request, response);
     } else {
         HttpRequestHandler::service(request, response);
     }

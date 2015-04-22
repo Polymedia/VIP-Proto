@@ -5,6 +5,8 @@
 
 #include <httpserver/httprequesthandler.h>
 
+class JsonTableController;
+
 class RequestHandler : public HttpRequestHandler
 {
     Q_OBJECT
@@ -17,6 +19,9 @@ public:
 signals:
 
 public slots:
+
+private:
+    JsonTableController *m_jsonTableController;
 };
 
 #endif // REQUESTHANDLER_H

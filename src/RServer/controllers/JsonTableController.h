@@ -9,7 +9,6 @@
 
 class JsonTableController : public HttpRequestHandler {
     Q_OBJECT
-    //Q_DISABLE_COPY(JsonTableController)
 public:
 
     /** Constructor */
@@ -19,14 +18,15 @@ public:
     /** Generates the response */
     void service(HttpRequest &request, HttpResponse &response);
 
-    void service(HttpRequest &request, HttpResponse &response, QByteArrayList path);
+    bool loadData();
 
-private:
-    void processTableName(HttpRequest &request, HttpResponse &response, QByteArrayList &path);
-    void processTableValue(HttpRequest &request, HttpResponse &response, QByteArray tableName, QByteArrayList &path);
+    void setPathList(const QByteArrayList &pathList);
 
 private:
     JsonDataLoader *m_dataLoader;
+    QByteArray m_protocolVersion;
+
+    QByteArrayList m_pathList;
 };
 
 #endif // JSONTABLECONTROLLER_H

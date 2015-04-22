@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonValue>
 
 #include <QDebug>
 
@@ -20,127 +21,126 @@ bool JsonDataLoader::loadData(const QString &fileName)
     bool ok = true;
     QFile file(fileName);
     ok &= file.open(QIODevice::ReadOnly);
-    //QByteArray fileData = file.readAll();
     QTextStream textSteam(&file);
-    //textSteam.setCodec("1251");
     QString fileData = textSteam.readAll();
     file.close();
 
-    //qDebug() << fileData;
-
     QJsonParseError err;
-
-    //qDebug() << fileData;
     m_jsonDoc = QJsonDocument::fromJson(fileData.toUtf8(), &err);
 
-    //qDebug() << m_jsonDoc.toVariant() << err.errorString() << err.error;
+    if (err.error != QJsonParseError::NoError) {
+        qDebug() << err.errorString() << err.error;
+    }
 
     ok &= !m_jsonDoc.isEmpty();
 
     return ok;
 }
 
-QByteArray JsonDataLoader::data() const
-{
-    //int size;
-    return m_jsonDoc.toJson();
-}
-
-QByteArray JsonDataLoader::table(QByteArray tableName)
-{
-    qDebug() << "NAME TABLE =" << tableName;
-
-    foreach (auto tableEl, m_jsonDoc.object()["tables"].toArray()) {
-        qDebug() << tableEl.toObject().value("id") << tableName << (tableEl.toObject().value("id") == tableName.toInt());
-
-        if (tableEl.toObject().value("id") == tableName.toInt()) {
-            qDebug() << "RET!" << tableEl;
-
-            return QJsonDocument(tableEl.toObject()).toJson();
-        }
-    }
-    //qDebug() << m_jsonDoc.object()["tables"].toArray()[0].toObject().value(name);
-
-    return QByteArray();
-}
-
-QByteArray JsonDataLoader::value(QByteArray tableName, QByteArray valueName)
-{
-    //qDebug() << "\n" << m_jsonDoc.object()["tables"].toArray();
-
-    foreach (auto tableEl, m_jsonDoc.object()["tables"].toArray()) {
-        QJsonObject obj = tableEl.toObject();
-        if (obj.value("id") == tableName.toInt()) {
-            qDebug() << tableEl;
-
-            if (obj.contains(valueName)) {
-                if (obj[valueName].isArray())
-                    return QJsonDocument(obj[valueName].toArray()).toJson();
-
-                if (obj[valueName].isObject())
-                    return QJsonDocument(obj[valueName].toObject()).toJson();
-
-                if (obj[valueName].isDouble())
-                    return QString::number(obj[valueName].isDouble()).toUtf8();
-            }
-        }
-    }
-
-    return QByteArray();
-}
-
-bool JsonDataLoader::containsTable(QByteArray tableName)
-{
-    foreach (auto tableEl, m_jsonDoc.object()["tables"].toArray()) {
-        if (tableEl.toObject().value("id") == tableName.toInt()) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool JsonDataLoader::containsValue(QByteArray tableName, QByteArray valueName)
-{
-    foreach (auto tableEl, m_jsonDoc.object()["tables"].toArray()) {
-        QJsonObject obj = tableEl.toObject();
-        if (obj.value("id") == tableName.toInt()) {
-            qDebug() << tableEl;
-
-            if (obj.contains(valueName))
-                return true;
-        }
-    }
-
-    return false;
-}
-
 QByteArray JsonDataLoader::get(const QByteArrayList &pathList)
 {
-    //pathList[]
-    //findChildren()
-    //qDebug() << pathList << m_jsonDoc.object().value(pathList.at(0));
+    // TODO: придумать норм парсилку
+
+    if (pathList.isEmpty())
+        return QByteArray("");
+
     QJsonArray mainObj = m_jsonDoc.object().value(pathList.at(0)).toArray();
     if (mainObj.isEmpty())
         return QByteArray();
 
-//    foreach (auto tableEl, m_jsonDoc.object()["tables"].toArray()) {
-//        QJsonObject obj = tableEl.toObject();
-//        if (obj.value("id") == tableName.toInt()) {
-//            qDebug() << tableEl;
+    if (pathList.length() == 1) {
+        return QJsonDocument(mainObj).toJson();
+    }
 
-//            if (obj.contains(valueName))
-//                return true;
-//        }
-//    }
+    if (pathList.length() == 2) {
+        foreach (auto tableEl, mainObj) {
+            QJsonObject obj = tableEl.toObject();
+            if (!obj.isEmpty() && obj.value("id").toString() == pathList.at(1)) {
+                return QJsonDocument(obj).toJson();
+            }
+        }
 
-    return QJsonDocument(mainObj).toJson();
+        return QByteArray("");
+    }
 
-    return QByteArray("dfsbgdf");
+    if (pathList.length() == 3) {
+        foreach (auto tableEl, mainObj) {
+            QJsonObject obj = tableEl.toObject();
+            if (!obj.isEmpty() && obj.value("id").toString() == pathList.at(1)) {
+                return QJsonDocument(obj.value(pathList.at(2)).toArray()).toJson();
+            }
+        }
+
+        return QByteArray("");
+    }
+
+    return QByteArray("");
 }
 
 bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value)
 {
-    return true;
+    // TODO: придумать норм парсилку
+
+    if (pathList.isEmpty())
+        return true;
+
+    QJsonParseError err;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(value, &err);
+    if (err.error != QJsonParseError::NoError) {
+        qDebug() << err.errorString();
+
+        return false;
+    }
+
+    QJsonObject mainObj = m_jsonDoc.object();
+    QJsonArray mainArray = mainObj.value(pathList.at(0)).toArray();
+    if (mainArray.isEmpty())
+        return false;
+
+
+
+    bool isCahnged = false;
+
+    if (pathList.length() == 1) {
+        if (!jsonDoc.isArray())
+            return false;
+
+        mainObj.insert("widgets", jsonDoc.array());
+        m_jsonDoc = QJsonDocument(mainObj);
+
+        return true;
+    }
+
+    for (int i = 0; i < mainArray.size(); i++) {
+        if (pathList.length() > 1 && mainArray[i].toObject().value("id").toString() == pathList.at(1)) {
+            if (pathList.length() == 2) {
+                mainArray.takeAt(i);
+                mainArray.insert(i, jsonDoc.object());
+                isCahnged = true;
+                break;
+            }
+
+            if (pathList.length() == 3) {
+                QJsonObject newVal = mainArray.takeAt(i).toObject();
+                if (jsonDoc.isObject())
+                    newVal.insert(pathList.at(2), jsonDoc.object());
+                else if (jsonDoc.isArray())
+                    newVal.insert(pathList.at(2), jsonDoc.array());
+
+                mainArray.insert(i, newVal);
+
+                isCahnged = true;
+
+                break;
+            }
+        }
+    }
+
+    if (isCahnged) {
+        mainObj.insert(pathList.at(0), mainArray);
+        m_jsonDoc = QJsonDocument(mainObj);
+
+        return true;
+    }
 }
 
