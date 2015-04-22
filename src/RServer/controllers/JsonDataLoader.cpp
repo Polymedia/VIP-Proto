@@ -41,8 +41,14 @@ QByteArray JsonDataLoader::get(const QByteArrayList &pathList)
 {
     // TODO: придумать норм парсилку
 
-    if (pathList.isEmpty())
-        return QByteArray("");
+    if (pathList.isEmpty()) {
+        QStringList keys = m_jsonDoc.object().keys();
+        if (keys.isEmpty())
+            return QByteArray();
+        else {
+            return QJsonDocument(m_jsonDoc.object().value(keys.at(0)).toArray()).toJson();
+        }
+    }
 
     QJsonArray mainObj = m_jsonDoc.object().value(pathList.at(0)).toArray();
     if (mainObj.isEmpty())
@@ -77,38 +83,52 @@ QByteArray JsonDataLoader::get(const QByteArrayList &pathList)
     return QByteArray("");
 }
 
-bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value)
+bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value, QString &errorString)
 {
     // TODO: придумать норм парсилку
 
     if (pathList.isEmpty())
         return true;
 
+    if (!pathList.isEmpty() && pathList.at(0) == "fix") {
+        loadData();
+        return true;
+    }
+
     QJsonParseError err;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(value, &err);
     if (err.error != QJsonParseError::NoError) {
         qDebug() << err.errorString();
+        errorString = err.errorString();
 
         return false;
     }
-
-    QJsonObject mainObj = m_jsonDoc.object();
-    QJsonArray mainArray = mainObj.value(pathList.at(0)).toArray();
-    if (mainArray.isEmpty())
-        return false;
-
 
 
     bool isCahnged = false;
 
     if (pathList.length() == 1) {
-        if (!jsonDoc.isArray())
+        if (pathList.at(0) == "widgets") {
+            errorString = "You wan't to change main array!\ Don't do that!";
             return false;
+        }
 
-        mainObj.insert("widgets", jsonDoc.array());
-        m_jsonDoc = QJsonDocument(mainObj);
+        //        if (!jsonDoc.isArray()) {
+        //            errorString = "POST body isn't JSON array!";
+        //            return false;
+        //        }
 
-        return true;
+        //        mainObj.insert(pathList.at(0), jsonDoc.array());
+        //        m_jsonDoc = QJsonDocument(mainObj);
+
+        //        return true;
+    }
+
+    QJsonObject mainObj = m_jsonDoc.object();
+    QJsonArray mainArray = mainObj.value(pathList.at(0)).toArray();
+    if (mainArray.isEmpty()) {
+        errorString = QString("Can't find %1 in main element").arg(QString(pathList.at(0)));
+        return false;
     }
 
     for (int i = 0; i < mainArray.size(); i++) {
@@ -142,5 +162,9 @@ bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value
 
         return true;
     }
+
+    errorString = "Nothing changed";
+    errorString.append("\nProbably wrong way: " + pathList.join('/'));
+    return false;
 }
 

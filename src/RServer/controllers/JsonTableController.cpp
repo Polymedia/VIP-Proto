@@ -11,7 +11,6 @@ JsonTableController::~JsonTableController()
     delete m_dataLoader;
 }
 
-
 void JsonTableController::service(HttpRequest &request, HttpResponse &response)
 {
     response.setHeader("Content-Type", "application/json");
@@ -27,25 +26,27 @@ void JsonTableController::service(HttpRequest &request, HttpResponse &response)
             response.write(returnErrorString, true);
         }
     } else if (request.getMethod() == "POST") {
-        bool ok = m_dataLoader->set(m_pathList, request.getBody());
+        QString error;
+        bool ok = m_dataLoader->set(m_pathList, request.getBody(), error);
 
         if (ok) {
-            QByteArray newData = m_dataLoader->get(QByteArrayList() << m_pathList.at(0));
+            QByteArray newData = m_dataLoader->get();
             if (!newData.isEmpty())
                 response.write(newData, true);
             else {
-                response.setStatus(400, returnErrorString);
-                response.write(returnErrorString, true);
+
             }
         } else {
-            response.write("Set Failed", true);
+            response.setStatus(400, error.toLocal8Bit());
+            response.write(error.toLocal8Bit());
+            response.write("\nSet Failed", true);
         }
     }
 }
 
 bool JsonTableController::loadData()
 {
-    bool ok = m_dataLoader->loadData("dataBase.txt");
+    bool ok = m_dataLoader->loadData();
     return ok;
 }
 

@@ -11,10 +11,10 @@ public:
     JsonDataLoader(QObject *parent = 0);
     ~JsonDataLoader();
 
-    bool loadData(const QString &fileName);
+    bool loadData(const QString &fileName = "dataBase.txt");
 
-    QByteArray get(const QByteArrayList &pathList);
-    bool set(const QByteArrayList &pathList, const QByteArray &value);
+    QByteArray get(const QByteArrayList &pathList = QByteArrayList());
+    bool set(const QByteArrayList &pathList, const QByteArray &value, QString &errorString = QString());
 
 signals:
 

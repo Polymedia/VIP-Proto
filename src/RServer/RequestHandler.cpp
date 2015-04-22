@@ -29,7 +29,7 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
     pathList.removeFirst();
 
     // Первый параметр отвечает за версию протокола
-    if (pathList.length() > 1 && pathList.at(1) == "widgets") {
+    if (pathList.length() > 1) {
         // TODO: Сделать абстрактный класс
         m_jsonTableController->setPathList(pathList);
         m_jsonTableController->service(request, response);
