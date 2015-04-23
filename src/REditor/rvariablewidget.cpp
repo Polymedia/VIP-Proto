@@ -1,6 +1,8 @@
 #include "rvariablewidget.h"
 #include "ui_rvariablewidget.h"
 
+#define MAX_ITEM_HEIGHT 300
+
 RVariableWidget::RVariableWidget(RConsole *console, const QString &name, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::RVariableWidget),
@@ -41,13 +43,14 @@ void RVariableWidget::updateVar()
 }
 
 //TODO: отдельно счить есть header или нет
+#include <QDebug>
 
 void RVariableWidget::updateSize()
 {
-    int modelHeight = m_model->rowCount() * (1 + m_view->rowHeight(0)) + ui->labelName->height() + ui->VLayout->spacing() * 3;
-    int maxItemHeight = 300;
-    int newHeight = maxItemHeight < modelHeight ? maxItemHeight : modelHeight;
+    int modelHeight = (1 + m_model->rowCount()) * m_view->rowHeight(0) + ui->labelName->height() + ui->VLayout->spacing() * 3;
+    int newHeight = MAX_ITEM_HEIGHT < modelHeight ? MAX_ITEM_HEIGHT : modelHeight;
 
+    qDebug() <<(1 + m_view->rowHeight(0)) << newHeight;
     setFixedHeight(newHeight);
 }
 
