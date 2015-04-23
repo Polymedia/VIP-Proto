@@ -1,5 +1,17 @@
 #include <UnitTest.h>
 
+class ITest
+{
+public:
+    virtual void func() = 0;
+};
+
+class MockTest : public ITest
+{
+public:
+    MOCK_METHOD0(func, void());
+};
+
 class tst_Example : public QObject
 {
     Q_OBJECT
@@ -19,7 +31,11 @@ tst_Example::tst_Example()
 void tst_Example::myTest()
 {    
     // ...
-    QFAIL("Expected fail");
+    MockTest mt;
+
+    EXPECT_CALL(mt, func());
+
+    GMOCK_VERIFY(mt);
 }
 
 DECLARE_TEST(tst_Example)
