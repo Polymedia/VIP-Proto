@@ -18,8 +18,7 @@ tst_Example::tst_Example()
 
 void tst_Example::myTest()
 {    
-    // ...
-    QFAIL("Expected fail");
+    // ...    
 }
 
 DECLARE_TEST(tst_Example)
