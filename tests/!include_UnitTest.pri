@@ -58,5 +58,19 @@
 	###     SETUP OUTPUT    ###
 	###########################
 	DESTDIR += $$TESTS_BIN
+
+        ###########################
+        ###       DEPLOY        ###
+        ###########################
+
+        CONFIG(release, debug|release){
+            CONFIG(DEPLOY_TESTS) {
+                !isEmpty(QMAKE_POST_LINK) {
+                    QMAKE_POST_LINK += &&
+                }
+                QMAKE_POST_LINK += "\"$$[QT_INSTALL_BINS]/windeployqt.exe\" \"$$DESTDIR/$${TARGET}.exe\" --libdir \"$$TESTS_BIN\" -no-translations --no-system-d3d-compiler --no-compiler-runtime && " \
+                                   "$$VCOPY \"$$VS_LIB\" \"$$TESTS_BIN\" *.dll"
+            }
+        }
 }
 # End Include checking

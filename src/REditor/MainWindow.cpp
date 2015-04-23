@@ -25,7 +25,7 @@ MainWindow::MainWindow(RConsole *r, QWidget *parent) :
 
     // Tempolary file for R plots
     m_plotFilePath = "tmpPlot.png";
-    QFile::remove1(m_plotFilePath);
+    QFile::remove(m_plotFilePath);
 
     m_outputTimer.setInterval(50);
     m_outputTimer.setSingleShot(true);

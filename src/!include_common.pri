@@ -20,10 +20,14 @@
     DEP = $$ROOT/dep
     DEP_INCLUDE = $$DEP/include
     DEP_LIB = $$DEP/lib
+    VS_LIB = $$DEP_LIB/vsredist
 
     LIB = $$ROOT/lib
 
     SRC = $$ROOT/src
+
+    # Tools
+    VCOPY = "$$DEP/vcopy.cmd"
 
     !win32-msvc2003:!win32-msvc2005:!win32-msvc2008:!win32-msvc2010:!win32-msvc2013 {
         error("Only win32 MSVC compiler supported!")

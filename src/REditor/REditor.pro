@@ -42,6 +42,21 @@ CONFIG(release, debug|release){
     TARGET = $$RELEASE_TARGET
 }
 
+###########################
+###       DEPLOY        ###
+###########################
+
+CONFIG(release, debug|release){
+    CONFIG(DEPLOY_APPS){
+        !isEmpty(QMAKE_POST_LINK) {
+            QMAKE_POST_LINK += &&
+        }
+        QMAKE_POST_LINK += "\"$$[QT_INSTALL_BINS]/windeployqt.exe\" \"$$DESTDIR/$${RELEASE_TARGET}.exe\" --libdir \"$$BIN/REditor\" -no-translations --no-system-d3d-compiler --no-compiler-runtime && " \
+                             "$$VCOPY \"$$VS_LIB\" \"$$BIN\\REditor\" *.dll"
+    }
+}
+
+
 
 ###########################
 ###       SOURCE        ###
