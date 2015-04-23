@@ -68,7 +68,7 @@
                 !isEmpty(QMAKE_POST_LINK) {
                     QMAKE_POST_LINK += &&
                 }
-                QMAKE_POST_LINK += "\"$$[QT_INSTALL_BINS]/windeployqt.exe\" \"$$DESTDIR/$${TARGET}.exe\" --libdir \"$$TESTS_BIN\" -no-translations --no-system-d3d-compiler --no-compiler-runtime && " \
+                QMAKE_POST_LINK += "$$DEPLOYQT \"$$DESTDIR/$${TARGET}.exe\" \"$$TESTS_BIN\" && " \
                                    "$$VCOPY \"$$VS_LIB\" \"$$TESTS_BIN\" *.dll"
             }
         }
