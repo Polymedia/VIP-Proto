@@ -35,8 +35,7 @@ rem If no pattern specified, run all executables in directory
 if %pattern%.==. set pattern=tst_*.exe
 
 for /f %%f in ('dir /b %pattern%') do (
-    echo %%f
-	call %%f
+	%%f
 	set /a total=!total!+1
 	
 	if !errorlevel! NEQ 0 (		
