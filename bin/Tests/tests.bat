@@ -36,6 +36,7 @@ if %pattern%.==. set pattern=tst_*.exe
 
 for /f %%f in ('dir /b %pattern%') do (
 	%%f
+    echo !errorlevel!
 	set /a total=!total!+1
 	
 	if !errorlevel! NEQ 0 (		
