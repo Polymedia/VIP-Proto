@@ -23,7 +23,7 @@ set BINARY=%2
 set LIBDIR=%3
 
 set PATH=%QT_BIN_DIR%;%PATH%
-windeployqt.exe "%BINARY%" --libdir "%LIBDIR%" -no-translations --no-system-d3d-compiler --no-compiler-runtime
+windeployqt.exe "%BINARY%" --libdir "%LIBDIR%" -no-translations --no-compiler-runtime
 set RESULT=%ERRORLEVEL%
 
 goto end
