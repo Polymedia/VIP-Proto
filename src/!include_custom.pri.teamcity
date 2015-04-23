@@ -11,7 +11,7 @@ OTHER_FILES += \
 ## Compile tests with project and
 ## deploys project libs to $$TESTS_BIN (in release build)
 ##
-CONFIG -= INCLUDE_TESTS
+CONFIG += INCLUDE_TESTS
 
 ##
 ## Deploy dependency libs for applications
@@ -24,4 +24,6 @@ CONFIG -= DEPLOY_APPS
 ##  - works only if INCLUDE_TESTS set
 ##  - relevant only for release builds
 ##
-CONFIG -= DEPLOY_TESTS
+CONFIG += DEPLOY_TESTS
+
+
