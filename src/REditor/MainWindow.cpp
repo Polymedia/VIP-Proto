@@ -7,6 +7,8 @@
 #include "Console.h"
 #include <QDebug>
 
+#include "rvariablewidget.h"
+
 MainWindow::MainWindow(RConsole *r, QWidget *parent) :
     QMainWindow(parent),
     m_rconsole(r),
@@ -32,6 +34,10 @@ MainWindow::MainWindow(RConsole *r, QWidget *parent) :
 
     m_waitOutputTimer.setInterval(75);
     m_waitOutputTimer.setSingleShot(true);
+
+    ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+    connect(m_guiConsole, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
 }
 
 MainWindow::~MainWindow()
@@ -96,4 +102,22 @@ void MainWindow::printOutputBuf()
 void MainWindow::onWainExtaInput()
 {
     m_guiConsole->extraInput();
+}
+
+void MainWindow::addVar(const QString &s)
+{
+    RVariableWidget *widget = new RVariableWidget(m_rconsole, s);
+    QListWidgetItem *newWidget = new QListWidgetItem(ui->listWidget, QListWidgetItem::UserType);
+    newWidget->setSizeHint(widget->size());
+    ui->listWidget->setItemWidget(newWidget, widget);
+}
+
+void MainWindow::updateVariables()
+{
+    for (int i = 0; i < ui->listWidget->count(); ++i)
+    {
+        RVariableWidget *rVar = dynamic_cast<RVariableWidget *>(ui->listWidget->itemWidget(ui->listWidget->item(i)));
+        rVar->updateVar();
+        ui->listWidget->item(i)->setSizeHint(rVar->size());
+    }
 }

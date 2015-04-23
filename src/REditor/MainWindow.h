@@ -29,6 +29,10 @@ private slots:
     void printOutputBuf();
     void onWainExtaInput();
 
+public slots:
+    void addVar(const QString &s);
+    void updateVariables();
+
 private:
     QString m_plotFilePath;
     RConsole *m_rconsole;

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
         }
 
         model.load(&file, ';', true);
-        r["input" + QString::number(counter)] = RObject::fromModel(&model);
+        r["In_" + QString::number(counter)] = RObject::fromModel(&model);
     }
 
     MainWindow w(&r);
