@@ -34,7 +34,8 @@ void JsonTableController::service(HttpRequest &request, HttpResponse &response)
             if (!newData.isEmpty())
                 response.write(newData, true);
             else {
-
+                response.setStatus(400, "Main array is empty");
+                response.write("ERROR! Main array is empty", true);
             }
         } else {
             response.setStatus(400, error.toLocal8Bit());

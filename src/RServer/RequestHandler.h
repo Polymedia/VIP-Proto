@@ -6,12 +6,14 @@
 #include <httpserver/httprequesthandler.h>
 
 class JsonTableController;
+class ScriptHandler;
+class RConsole;
 
 class RequestHandler : public HttpRequestHandler
 {
     Q_OBJECT
 public:
-    RequestHandler(QObject *parent = 0);
+    RequestHandler(RConsole *r, QObject *parent = 0);
     ~RequestHandler();
 
     void service(HttpRequest &request, HttpResponse &response);
@@ -22,6 +24,8 @@ public slots:
 
 private:
     JsonTableController *m_jsonTableController;
+
+    ScriptHandler *m_scriptHandler;
 };
 
 #endif // REQUESTHANDLER_H

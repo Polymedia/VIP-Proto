@@ -1,25 +1,28 @@
 #include "RequestHandler.h"
 
 #include "controllers/JsonTableController.h"
+#include "ScriptHandler.h"
 
-RequestHandler::RequestHandler(QObject *parent) :
+RequestHandler::RequestHandler(RConsole *r, QObject *parent) :
     HttpRequestHandler(parent),
     m_jsonTableController(new JsonTableController)
 {
     m_jsonTableController->loadData();
+    m_scriptHandler = new ScriptHandler(r, this);
 }
 
 RequestHandler::~RequestHandler()
 {
     delete m_jsonTableController;
+    delete m_scriptHandler;
 }
 
 void RequestHandler::service(HttpRequest &request, HttpResponse &response)
 {
-//    qDebug() << "getMethod" << request.getMethod();
-//    qDebug() << "getPath" << request.getPath();
-//    qDebug() << "getBody" << request.getBody();
-//    qDebug() << "getParameterMap" << request.getParameterMap();
+    //    qDebug() << "getMethod" << request.getMethod();
+    //    qDebug() << "getPath" << request.getPath();
+    //    qDebug() << "getBody" << request.getBody();
+    //    qDebug() << "getParameterMap" << request.getParameterMap();
 
     QByteArray path = request.getPath();
     QByteArrayList pathList = path.split('/');
@@ -30,9 +33,39 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
 
     // Первый параметр отвечает за версию протокола
     if (pathList.length() > 1) {
-        // TODO: Сделать абстрактный класс
-        m_jsonTableController->setPathList(pathList);
-        m_jsonTableController->service(request, response);
+        // TODO: придумать "абстрактную" обработку запросов
+
+        if (request.getMethod() == "GET") {
+            // TODO:
+            // здесь надо запускать реальный скрипт,
+            // который возвращает JSON массив отупут переменных
+            // сейчас заглушка, потом надо избавиться от JsonTableController
+            m_jsonTableController->setPathList(pathList);
+            m_jsonTableController->service(request, response);
+            return;
+        }
+
+        if (request.getMethod() == "POST") {
+            bool ok = m_scriptHandler->loadDataFromJson(request.getBody());
+
+            if (!ok) {
+                response.setStatus(400, "Bad input");
+                response.write("Bad input", true);
+                return;
+            }
+
+            ok = m_scriptHandler->runScript();
+
+            if (!ok) {
+                response.setStatus(500, "Script error");
+                response.write("Script error", true);
+                return;
+            }
+
+            QByteArray output = m_scriptHandler->getOutputLikeJson();
+            response.write(output, true);
+            return;
+        }
     } else {
         HttpRequestHandler::service(request, response);
     }
