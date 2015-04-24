@@ -21,21 +21,24 @@ private slots:
     void onEnter();
 
 private:
-    void insertPrompt(bool insertNewBlock = true, bool dafaultPromt = true);
+    void insertPrompt(bool insertNewBlock = true);
     void historyAdd(const QString &cmd);
     void historyBack();
     void historyForward();
     void findLastBlock(int &first, int &last);
     bool isCursorInLastBlock(int curPos = -1);
     void setEditing(bool allow);
+    void clearCurrentBlock();
 
 private:
-    static const QString m_prompt;
+    static const QString m_defaultPrompt;
     static const QString m_ExtraPrompt;
-    bool m_isLocked;
+    QString m_currentPromt;
     QStringList *m_history;
     static const int m_historyCount;
     int m_historyPos;
+
+    bool m_isExtra;
 
 signals:
     void command(QString);

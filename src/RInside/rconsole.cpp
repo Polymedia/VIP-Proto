@@ -49,7 +49,7 @@ static int ReadConsole(const char *prompt, char *buf, int len, int /*addtohistor
 static void WriteConsole(const char *buf, int /*len*/)
 {
     //printf("%s", buf);
-    R->write(buf);
+    R->write(QString::fromLocal8Bit(buf));
 }
 
 static void CallBack(void)
@@ -128,8 +128,7 @@ bool RConsole::execute(const QString &code)
             int errorOccurred;
             ans = R_tryEval(VECTOR_ELT(cmdexpr, i), R_GlobalEnv, &errorOccurred);
             if (errorOccurred) {
-                QString evalError = R_curErrorBuf();
-                emit error(evalError);
+                emit error(QString::fromLocal8Bit(R_curErrorBuf()));
 
                 UNPROTECT(2);
                 return false;
@@ -139,7 +138,7 @@ bool RConsole::execute(const QString &code)
         UNPROTECT(2);
         return true;
     case PARSE_INCOMPLETE:
-        emit error(QString("Parse error (%1): parse is incomplete").arg(status));
+        emit parseIncomplete(code);
         break;
     case PARSE_NULL:
         emit error(QString("Parse error (%1): parse is null").arg(status));
