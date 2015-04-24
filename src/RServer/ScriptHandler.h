@@ -4,7 +4,7 @@
 #include <QObject>
 
 #define INPUT_FROM_CSV_NAME "inputFromCSV"
-#define OPERATOR_OBJECT_NAME "operatorObject"
+#define INPUT_FROM_DASHBOARD1_NAME "inputFromDashboard1"
 #define OUTPUT1_NAME "firstWidget"
 
 class RConsole;

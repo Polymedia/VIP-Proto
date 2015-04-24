@@ -93,7 +93,7 @@ bool ScriptHandler::runScript(const QString &scriptName)
 
 void ScriptHandler::fillInputRObject()
 {
-    m_inputRObject.name = OPERATOR_OBJECT_NAME;
+    m_inputRObject.name = INPUT_FROM_DASHBOARD1_NAME;
     RObject *obj = new RObject(RObject::Frame, RObject::Float, 4, 4);
     obj->fill(-1);
     m_inputRObject.robj = obj;
