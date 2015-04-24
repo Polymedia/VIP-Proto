@@ -40,7 +40,7 @@ private slots:
 
     void onNew();
     void onOpen();
-    void onSave(const QString &fileName = "", bool saveAs = true);
+    void onSave(bool saveAs = false);
     void onSaveAs();
     void onExecute();
 

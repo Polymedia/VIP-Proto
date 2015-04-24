@@ -187,29 +187,31 @@ void MainWindow::onOpen()
     }
 }
 
-void MainWindow::onSave(const QString &fileName, bool saveAs)
+void MainWindow::onSave(bool saveAs)
 {
-    QString _fileName = fileName.isEmpty() ? m_fileName : fileName;
-    if (!_fileName.isEmpty()) {
-        QFile file(_fileName);
-        file.open(QIODevice::WriteOnly | QIODevice::Text);
-        file.write(ui->editor->toPlainText().toLocal8Bit().data());
+    QString fileName;
+    if (saveAs || m_fileName.isEmpty()) {
+        fileName = QFileDialog::getSaveFileName(this,
+                                                "Save file",
+                                                QDir::homePath(),
+                                                "R files" + QString(" (*.r *.txt)"));
+        if (fileName.isEmpty())
+            return;
 
-        setEditorFile(_fileName);
-    } else {
-        if (saveAs)
-            onSaveAs();
+        m_fileName = fileName;
     }
+
+    QFile file(m_fileName);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    file.write(ui->editor->toPlainText().toLocal8Bit().data());
+
+    setEditorFile(m_fileName);
 }
 
 void MainWindow::onSaveAs()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-                                                    "Save file",
-                                                    QDir::homePath(),
-                                                    "R files" + QString(" (*.r *.txt)"));
+    onSave(true);
 
-    onSave(fileName, false);
 }
 
 void MainWindow::onExecute()
