@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(RConsole *r, QWidget *parent = 0);
+    MainWindow(RConsole &r, QWidget *parent = 0);
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -49,7 +49,7 @@ private slots:
 private:
     QString m_fileName;
     QString m_plotFilePath;
-    RConsole *m_rconsole;
+    RConsole &m_rconsole;
     bool m_editorTextChanged;
 
     QString m_outputBuf;

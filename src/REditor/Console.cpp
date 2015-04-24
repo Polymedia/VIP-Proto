@@ -77,7 +77,7 @@ void Console::keyPressEvent(QKeyEvent *event)
     emit commandStringChanged(cmd);
 }
 
-void Console::contextMenuEvent(QContextMenuEvent *event)
+void Console::contextMenuEvent(QContextMenuEvent *)
 {
     // Убираем контекстное меню
     //QPlainTextEdit::contextMenuEvent(event);
@@ -169,7 +169,7 @@ void Console::scrollDown()
 
 void Console::execute(const QString &text, bool all)
 {
-    if (all && text.trimmed().length())
+    if (all && !text.trimmed().isEmpty())
         emit command(text.trimmed());
     else {
         QStringList list = text.split(QRegExp("\n|\r\n|\r"), QString::SkipEmptyParts);

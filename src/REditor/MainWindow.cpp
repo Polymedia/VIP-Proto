@@ -12,7 +12,7 @@
 
 const QString editorName = "REditor";
 
-MainWindow::MainWindow(RConsole *r, QWidget *parent) :
+MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     QMainWindow(parent),
     m_rconsole(r),
     m_editorTextChanged(false),
@@ -34,7 +34,7 @@ MainWindow::MainWindow(RConsole *r, QWidget *parent) :
     ui->console->execute(QString("png(\"%1\")").arg(m_plotFilePath), true);
 
     // after clear & execute png
-    connect(ui->editor, &QPlainTextEdit::textChanged, [this] () {this->m_editorTextChanged = true;});
+    connect(ui->editor, &QPlainTextEdit::textChanged, [&] () {m_editorTextChanged = true;});
     connect(ui->console, SIGNAL(command(QString)), SLOT(onCommand(QString)));
 }
 
@@ -62,12 +62,13 @@ void MainWindow::initR()
         }
 
         model.load(&file, ';', true);
-        (*m_rconsole)["input" + QString::number(counter)] = RObject::fromModel(&model);
+        m_rconsole["input" + QString::number(counter)] = RObject::fromModel(&model);
     }
 }
 
-void MainWindow::clearR() {
-    m_rconsole->execute("rm(list=ls()");
+void MainWindow::clearR()
+{
+    m_rconsole.execute("rm(list=ls()");
 }
 
 
@@ -81,13 +82,13 @@ void MainWindow::setEditorFile(const QString &fileName)
 
 void MainWindow::onCommand(const QString &command)
 {
-    disconnect(m_rconsole, 0, this, 0);
+    disconnect(&m_rconsole, 0, this, 0);
 
-    connect(m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
-    connect(m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
-    connect(m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
+    connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
+    connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
+    connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
 
-    m_rconsole->execute(command);
+    m_rconsole.execute(command);
 
     printOutputBuf();
     m_lastOutput.clear();
@@ -112,11 +113,10 @@ void MainWindow::onRParseIncomplete()
 
 void MainWindow::updatePlot()
 {
-    m_rconsole->execute("dev.off()");
+    m_rconsole.execute("dev.off()");
 
     QImage plot;
     if (plot.load(m_plotFilePath)) {
-
         QPixmap pm = QPixmap::fromImage(plot).scaled(ui->lbPlot->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         ui->lbPlot->setPixmap(pm);
     }
