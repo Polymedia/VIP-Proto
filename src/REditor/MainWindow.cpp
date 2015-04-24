@@ -20,9 +20,13 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    centralWidget()->setMaximumSize(1,1);
+
     ui->editor->setAcceptDrops(false);
     ui->console->setAcceptDrops(false);
 
+    splitDockWidget(ui->editorDock, ui->envDock, Qt::Horizontal);
+    splitDockWidget(ui->consoleDock, ui->graphicsDock, Qt::Horizontal);
 
     // Tempolary file for R plots
     m_plotFilePath = "tmpPlot.png";
@@ -218,6 +222,23 @@ void MainWindow::onExecute()
 {
     initR();
     ui->console->execute(ui->editor->toPlainText(), true);
+}
+
+void MainWindow::onDockToggle(bool checked)
+{
+    QObject *object = sender();
+
+    if (object == ui->actionEditor)
+        ui->editorDock->setVisible(checked);
+
+    else if (object == ui->actionConsole)
+        ui->consoleDock->setVisible(checked);
+
+    else if (object == ui->actionGraphics)
+        ui->graphicsDock->setVisible(checked);
+
+    else if (object == ui->actionEnvironment)
+        ui->envDock->setVisible(checked);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
