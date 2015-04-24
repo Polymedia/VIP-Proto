@@ -12,8 +12,8 @@ SUBDIRS = \
 REditor.depends += \
     RInside
 
-REditor.depends += \
-    RServer
+RServer.depends += \
+    RInside
     
 CONFIG(INCLUDE_TESTS) {
     SUBDIRS += Tests

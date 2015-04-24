@@ -19,11 +19,6 @@ RequestHandler::~RequestHandler()
 
 void RequestHandler::service(HttpRequest &request, HttpResponse &response)
 {
-    //    qDebug() << "getMethod" << request.getMethod();
-    //    qDebug() << "getPath" << request.getPath();
-    //    qDebug() << "getBody" << request.getBody();
-    //    qDebug() << "getParameterMap" << request.getParameterMap();
-
     QByteArray path = request.getPath();
     QByteArrayList pathList = path.split('/');
     if (pathList.last().isEmpty())

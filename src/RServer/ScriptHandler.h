@@ -30,13 +30,13 @@ public:
     bool runScript(const QString &scriptName = "");
 
 private:
-    void fillOperatorRObject();
+    void fillInputRObject();
 
     QJsonObject prepareOutput1();
 
 private:
-    RConsole *m_rconsole;
-    OperatorRObject m_operatorRObject;
+    RConsole &m_rconsole;
+    OperatorRObject m_inputRObject;
 };
 
 #endif // SCRIPTHANDLER_H

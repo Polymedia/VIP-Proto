@@ -14,15 +14,15 @@
 
 ScriptHandler::ScriptHandler(RConsole *r, QObject *parent):
     QObject(parent),
-    m_rconsole(r)
+    m_rconsole(*r)
 {
     loadDataFromCSV();
-    fillOperatorRObject();
+    fillInputRObject();
 }
 
 ScriptHandler::~ScriptHandler()
 {
-    delete m_operatorRObject.robj;
+    delete m_inputRObject.robj;
 }
 
 void ScriptHandler::loadDataFromCSV(const QString &fileName)
@@ -36,16 +36,16 @@ void ScriptHandler::loadDataFromCSV(const QString &fileName)
     }
 
     model.load(&file, ';', true);
-    (*m_rconsole)[INPUT_FROM_CSV_NAME] = RObject::fromModel(&model);
+    m_rconsole[INPUT_FROM_CSV_NAME] = RObject::fromModel(&model);
 }
 
 bool ScriptHandler::loadDataFromJson(const QByteArray &jsonData)
 {
     RObject newObj = RObject::fromJsonObject(jsonData);
 
-    if (newObj.columns() == m_operatorRObject.robj->columns()
-            && newObj.rows() == m_operatorRObject.robj->rows()) {
-        (*m_rconsole)[m_operatorRObject.name] = newObj;
+    if (newObj.columns() == m_inputRObject.robj->columns()
+            && newObj.rows() == m_inputRObject.robj->rows()) {
+        m_rconsole[m_inputRObject.name] = newObj;
 
         return true;
     }
@@ -75,45 +75,36 @@ bool ScriptHandler::runScript(const QString &scriptName)
     for (int i = 0; i < rows.length(); i++)
         rows.setValue(QString("row %1").arg(i + 1), i);
 
-    RObject obj = (*m_rconsole)[m_operatorRObject.name];
+    RObject obj = m_rconsole[m_inputRObject.name];
     RModel firstWidgetModel(firstWidget);
     RModel objModel(obj);
 
     for (int i = 0; i < objModel.rowCount(); i++) {
-        //QDebug log = qDebug();
         for (int j = 0; j < objModel.columnCount(); j++) {
-            //log << objModel.data(objModel.index(i, j)).toDouble();
             firstWidgetModel.setData(firstWidgetModel.index(2 + i, 3 + j),
                                      objModel.data(objModel.index(i, j)).toDouble());
         }
     }
 
-//    for (int i = 0; i < firstWidgetModel.rowCount(); i++) {
-//        QDebug log = qDebug();
-//        for (int j = 0; j < firstWidgetModel.columnCount(); j++) {
-//            log << firstWidgetModel.data(firstWidgetModel.index(i, j)).toDouble();
-//        }
-//    }
-
-    (*m_rconsole)[OUTPUT1_NAME] = firstWidget;
+    m_rconsole[OUTPUT1_NAME] = firstWidget;
 
     return true;
 }
 
-void ScriptHandler::fillOperatorRObject()
+void ScriptHandler::fillInputRObject()
 {
-    m_operatorRObject.name = OPERATOR_OBJECT_NAME;
+    m_inputRObject.name = OPERATOR_OBJECT_NAME;
     RObject *obj = new RObject(RObject::Frame, RObject::Float, 4, 4);
     obj->fill(-1);
-    m_operatorRObject.robj = obj;
-    (*m_rconsole)[m_operatorRObject.name] = *m_operatorRObject.robj;
+    m_inputRObject.robj = obj;
+    m_rconsole[m_inputRObject.name] = *m_inputRObject.robj;
 }
 
 QJsonObject ScriptHandler::prepareOutput1()
 {
     QJsonObject jsonObj;
 
-    RObject robj = (*m_rconsole)[OUTPUT1_NAME];
+    RObject robj = m_rconsole[OUTPUT1_NAME];
     QJsonArray headersArray, rowsArray, valuesArray;
     RObject headers = robj.attribute("names");
 

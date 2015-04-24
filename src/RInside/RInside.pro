@@ -52,7 +52,7 @@ CONFIG(release, debug|release){
                            "$$VCOPY \"$$VS_LIB\" \"$$BIN\\REditor\" *.dll"
     }
 
-    # REditor
+    # RServer
     DLLDESTDIR += $$BIN/RServer
     CONFIG(DEPLOY_APPS){
         !isEmpty(QMAKE_POST_LINK) {

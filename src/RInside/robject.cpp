@@ -314,7 +314,7 @@ RObject RObject::fromJsonObject(const QByteArray &ba)
     ///                       ]
     ///     }
     /// количество элементов в "rows" должно совпадать с количеством "строк" в массиве values
-    /// количество эелементов в "headers" должно совпадать с количеством "столбцов" в массиве values
+    /// количество элементов в "headers" должно совпадать с количеством "столбцов" в массиве values
 
     QJsonParseError err;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(ba, &err);

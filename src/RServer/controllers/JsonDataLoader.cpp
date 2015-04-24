@@ -105,23 +105,13 @@ bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value
     }
 
 
-    bool isCahnged = false;
+    bool isChanged = false;
 
     if (pathList.length() == 1) {
         if (pathList.at(0) == "widgets") {
-            errorString = "You wan't to change main array!\ Don't do that!";
+            errorString = "You wan't to change main array! Don't do that!";
             return false;
         }
-
-        //        if (!jsonDoc.isArray()) {
-        //            errorString = "POST body isn't JSON array!";
-        //            return false;
-        //        }
-
-        //        mainObj.insert(pathList.at(0), jsonDoc.array());
-        //        m_jsonDoc = QJsonDocument(mainObj);
-
-        //        return true;
     }
 
     QJsonObject mainObj = m_jsonDoc.object();
@@ -136,7 +126,7 @@ bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value
             if (pathList.length() == 2) {
                 mainArray.takeAt(i);
                 mainArray.insert(i, jsonDoc.object());
-                isCahnged = true;
+                isChanged = true;
                 break;
             }
 
@@ -149,14 +139,14 @@ bool JsonDataLoader::set(const QByteArrayList &pathList, const QByteArray &value
 
                 mainArray.insert(i, newVal);
 
-                isCahnged = true;
+                isChanged = true;
 
                 break;
             }
         }
     }
 
-    if (isCahnged) {
+    if (isChanged) {
         mainObj.insert(pathList.at(0), mainArray);
         m_jsonDoc = QJsonDocument(mainObj);
 
