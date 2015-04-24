@@ -62,6 +62,9 @@ public:
 
     static RObject fromModel(QAbstractTableModel *model);
     static RObject fromVariant(QVariant v);
+    static RObject fromJsonObject(const QByteArray &ba);
+
+    void fill(QVariant var);
 
 private:
     RStorage evalStorage(SEXP object);

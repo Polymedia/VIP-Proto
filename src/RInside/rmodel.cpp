@@ -22,6 +22,7 @@ int RModel::rowCount(const QModelIndex &/*parent*/) const
         RObject dims = m_object.attribute("dim");
         return dims.value(0).toInt() * dims.value(2).toInt();
     }
+    case RObject::List:
     case RObject::Vector:
         return m_object.length();
     default:

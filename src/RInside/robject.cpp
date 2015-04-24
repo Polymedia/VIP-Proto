@@ -2,6 +2,11 @@
 #include "rmodel.h"
 #include "shield.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDebug>
+
 #define USE_RINTERNALS
 #include <Rinternals.h>
 
@@ -35,7 +40,7 @@ static void setPlain(SEXP value, int offset, QVariant val)
 {
     switch (TYPEOF(value))
     {
-    case LGLSXP: 
+    case LGLSXP:
         plainData<int>(value, offset) = val.toInt();
         break;
     case INTSXP:
@@ -99,7 +104,7 @@ static SEXP createDataframe(int rows, int columns)
 {
     Shield df(Rf_allocVector(VECSXP, columns));
     Rf_setAttrib(df, R_NamesSymbol, Rf_allocVector(STRSXP, columns));
-    Rf_setAttrib(df, R_RowNamesSymbol, Rf_allocVector(INTSXP, rows));
+    Rf_setAttrib(df, R_RowNamesSymbol, Rf_allocVector(STRSXP, rows));
     Rf_setAttrib(df, R_ClassSymbol, Rf_mkString("data.frame"));
     return df;
 }
@@ -142,6 +147,8 @@ RObject::RObject(RStorage storage, RType type, int rows, int columns)
     {
     case RObject::Frame:
         m_object = createDataframe(rows, columns);
+        for (int i = 0; i < columns; i++)
+            plainData<SEXP>(m_object, i) = Rf_allocVector(rType(type), rows);
         break;
     case RObject::Matrix:
         m_object = createMatrix(type, rows, columns);
@@ -249,7 +256,7 @@ RObject RObject::fromModel(QAbstractTableModel *model)
 
     //Load column names
     SEXP names = Rf_getAttrib(df, R_NamesSymbol);
-    for (int i = 0; i < model->columnCount(); i++) {
+    for (int i = 0; i < columns; i++) {
         QString name = model->headerData(i, Qt::Horizontal).toString();
         plainData<SEXP>(names, i) = Rf_mkChar(name.toUtf8().constData());
         //Get type from first row
@@ -259,15 +266,15 @@ RObject RObject::fromModel(QAbstractTableModel *model)
 
     //Load row numbers
     SEXP rowNames = Rf_getAttrib(df, R_RowNamesSymbol);
-    for (int i = 0; i < model->rowCount(); ++i) {
+    for (int i = 0; i < rows; ++i) {
         int rowName = model->headerData(i, Qt::Vertical).toInt();
         setPlain(rowNames, i, rowName + 1);
     }
 
     //Load data
-    for (int j = 0; j < model->columnCount(); j++) {
+    for (int j = 0; j < columns; j++) {
         SEXP col = plainData<SEXP>(df, j);
-        for (int i = 0; i < model->rowCount(); ++i) {
+        for (int i = 0; i < rows; ++i) {
             setPlain(col, i, model->data(model->index(i, j)));
         }
     }
@@ -293,6 +300,128 @@ RObject RObject::fromVariant(QVariant v)
     }
     default:
         return RObject();
+    }
+}
+
+RObject RObject::fromJsonObject(const QByteArray &ba)
+{
+    /// Конвертим из JSON вида:
+    ///     {
+    ///         "headers"   : ["col 1", "col 2", ...],
+    ///         "rows"      : ["row 1", "row 2", ...],
+    ///         "values"    : [ [1, 2, 3, ...],
+    ///                         [4, 5, 6, ...], ...
+    ///                       ]
+    ///     }
+    /// количество элементов в "rows" должно совпадать с количеством "строк" в массиве values
+    /// количество эелементов в "headers" должно совпадать с количеством "столбцов" в массиве values
+
+    QJsonParseError err;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(ba, &err);
+
+    if (err.error != QJsonParseError::NoError)
+        return RObject();
+
+    QJsonObject mainObj = jsonDoc.object();
+    if (mainObj.isEmpty())
+        return RObject();
+
+    if (!mainObj.contains("rows") || !mainObj.contains("headers") || !mainObj.contains("values"))
+        return RObject();
+
+    QJsonArray rows, headers, values;
+    rows = mainObj.value("rows").toArray();
+    headers = mainObj.value("headers").toArray();
+    values =  mainObj.value("values").toArray();
+
+    int rowsCount, headersCount, valuesCount;
+
+
+    rowsCount = rows.size();
+    headersCount = headers.size();
+    valuesCount = values.size();
+
+    if (headersCount == 0 || rowsCount == 0 || valuesCount == 0 || valuesCount != rowsCount)
+        return RObject();
+
+    //Create data frame
+    Shield df(createDataframe(rowsCount, headersCount));
+
+    //Load column names
+    SEXP headerNames = Rf_getAttrib(df, R_NamesSymbol);
+    for (int i = 0; i < headersCount; i++) {
+        QString headerName = headers.at(i).toString();
+        plainData<SEXP>(headerNames, i) = Rf_mkChar(headerName.toUtf8().constData());
+        // TODO!
+        // пока предполагаем, что все данные - Float
+        plainData<SEXP>(df, i) = Rf_allocVector(rType(RType::Float), rowsCount);
+    }
+
+    //Load row numbers
+    SEXP rowNames = Rf_getAttrib(df, R_RowNamesSymbol);
+    for (int i = 0; i < rowsCount; ++i) {
+        QString rowName = rows.at(i).toString();
+        setPlain(rowNames, i, rowName);
+    }
+
+    //Load data
+    for (int i = 0; i < rowsCount; ++i) {
+        QJsonArray row = values.at(i).toArray();
+        if (row.isEmpty() || row.count() != headersCount)
+            return RObject();
+
+        for (int j = 0; j < headersCount; j++) {
+            SEXP col = plainData<SEXP>(df, j);
+            setPlain(col, i, row.at(j).toVariant());
+        }
+    }
+
+    return RObject(df);
+}
+
+void RObject::fill(QVariant var)
+{
+    switch (m_storage) {
+    case Frame:
+        for (int j = 0; j < attribute("names").length(); j++) {
+            SEXP col = plainData<SEXP>(m_object, j);
+            for (int i = 0; i < attribute("row.names").length(); ++i) {
+                setPlain(col, i, var);
+            }
+        }
+        break;
+    case Matrix:
+        for (int j = 0; j < columns(); j++) {
+            SEXP col = plainData<SEXP>(m_object, j);
+            for (int i = 0; i < rows(); ++i) {
+                setPlain(col, i, var);
+            }
+        }
+        break;
+    case List:
+        for (int j = 0; j < length(); j++) {
+            SEXP col = plainData<SEXP>(m_object, j);
+            for (int i = 0; i < data(i).length(); ++i) {
+                setPlain(col, i, var);
+            }
+        }
+        break;
+    case Array: {
+        RObject dims = attribute("dim");
+        for (int j = 0; j < dims.value(1).toInt(); j++) {
+            SEXP col = plainData<SEXP>(m_object, j);
+            for (int i = 0; i < dims.value(0).toInt() * dims.value(2).toInt(); ++i) {
+                setPlain(col, i, var);
+            }
+        }
+        break;
+    }
+    case Vector:
+        for (int i = 0; i < length(); ++i) {
+            SEXP col = plainData<SEXP>(m_object, i);
+            setPlain(col, i, var);
+        }
+    case Other: break;
     }
 }
 
