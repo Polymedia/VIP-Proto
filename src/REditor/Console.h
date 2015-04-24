@@ -8,6 +8,7 @@ class Console : public QPlainTextEdit
     Q_OBJECT
 public:
     Console(QWidget *parent = 0);
+    void execute(const QString &text, bool all);
     void output(const QString &s);
     void extraInput();
     void scrollDown();
@@ -15,6 +16,9 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
+
+public slots:
+    void clear();
 
 private slots:
     void onCursorPositionChanged();

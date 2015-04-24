@@ -1,9 +1,7 @@
 #include "console.h"
 
-#include <QTextBlock>
-#include <QScrollBar>
-
-#include <QMenu>
+#include <QtGui>
+#include <QtWidgets>
 
 QString const Console::m_defaultPrompt = "> ";
 QString const Console::m_ExtraPrompt = "+ ";
@@ -24,7 +22,7 @@ Console::Console(QWidget *parent) :
 void Console::keyPressEvent(QKeyEvent *event)
 {
     // Если консоль заблочена, или курсор находится не в последнем блоке, то игнорим нажатия клавы
-    if (!isCursorInLastBlock())
+    if (!isCursorInLastBlock() && (event->key() != Qt::Key_C && event->modifiers() == Qt::ControlModifier))
         return;
 
     bool isProcessed = false;
@@ -60,6 +58,16 @@ void Console::keyPressEvent(QKeyEvent *event)
         }
     }
 
+    if (event->modifiers() == Qt::ControlModifier) {
+        switch (event->key()) {
+        case Qt::Key_C:
+        case Qt::Key_V: {
+            QPlainTextEdit::keyPressEvent(event);
+            break;
+        }
+        }
+    }
+
     // Обработчик нажатий видимых символов
     if ((event->modifiers() == Qt::NoModifier || event->modifiers() == Qt::ShiftModifier)
             && !event->text().isNull() && event->key() && !isProcessed)
@@ -69,10 +77,16 @@ void Console::keyPressEvent(QKeyEvent *event)
     emit commandStringChanged(cmd);
 }
 
-void Console::contextMenuEvent(QContextMenuEvent *event)
+void Console::contextMenuEvent(QContextMenuEvent *)
 {
     // Убираем контекстное меню
     //QPlainTextEdit::contextMenuEvent(event);
+}
+
+void Console::clear()
+{
+    QPlainTextEdit::clear();
+    insertPrompt(false);
 }
 
 void Console::onCursorPositionChanged()
@@ -150,6 +164,24 @@ void Console::scrollDown()
 {
     QScrollBar *vbar = verticalScrollBar();
     vbar->setValue(vbar->maximum());
+}
+
+
+void Console::execute(const QString &text, bool all)
+{
+    if (all && !text.trimmed().isEmpty())
+        emit command(text.trimmed());
+    else {
+        QStringList list = text.split(QRegExp("\n|\r\n|\r"), QString::SkipEmptyParts);
+
+        foreach (QString line, list) {
+            if (line.trimmed().length()) {
+                output(m_defaultPrompt + line);
+                historyAdd(line);
+                emit command(line);
+            }
+        }
+    }
 }
 
 void Console::historyAdd(const QString &cmd)
