@@ -33,7 +33,7 @@ public:
 
     QByteArray getOutputLikeJson();
 
-    bool runScript(const QString &scriptName = "");
+    bool runScript(const QString &scriptName = "first_ex2.R");
 
 private:
     void fillInputRObject();

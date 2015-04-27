@@ -51,6 +51,7 @@ bool ScriptHandler::loadDataFromJson(const QByteArray &jsonData)
 
     if (newObj.columns() == m_inputRObject.robj->columns()
             && newObj.rows() == m_inputRObject.robj->rows()) {
+        m_inputRObject.robj = &newObj;
         m_rconsole[m_inputRObject.name] = newObj;
 
         return true;
@@ -75,31 +76,21 @@ QByteArray ScriptHandler::getOutputLikeJson()
 
 bool ScriptHandler::runScript(const QString &scriptName)
 {
-    RObject firstWidget(RObject::Frame, RObject::Float, 6, 7);
-    firstWidget.fill(-2);
+    bool ok = true;
+    QFile scriptFile(scriptName);
+    ok = scriptFile.open(QIODevice::ReadOnly);
 
-    RObject headers = firstWidget.attribute("names");
-    for (int i = 0; i < headers.length(); i++)
-        headers.setValue(QString("col %1").arg(i + 1), i);
+    if (!ok)
+        return false;
 
-    RObject rows = firstWidget.attribute("row.names");
-    for (int i = 0; i < rows.length(); i++)
-        rows.setValue(QString("row %1").arg(i + 1), i);
+    QTextStream textStream(&scriptFile);
+    QString line;
+    do {
+        line = textStream.readLine();
+        ok &= m_rconsole.execute(line);
+    } while (!textStream.atEnd());
 
-    RObject obj = m_rconsole[m_inputRObject.name];
-    RModel firstWidgetModel(firstWidget);
-    RModel objModel(obj);
-
-    for (int i = 0; i < objModel.rowCount(); i++) {
-        for (int j = 0; j < objModel.columnCount(); j++) {
-            firstWidgetModel.setData(firstWidgetModel.index(2 + i, 3 + j),
-                                     objModel.data(objModel.index(i, j)).toDouble());
-        }
-    }
-
-    m_rconsole[OUTPUT1_NAME] = firstWidget;
-
-    return true;
+    return ok;
 }
 
 void ScriptHandler::fillInputRObject()
@@ -157,4 +148,3 @@ QJsonObject ScriptHandler::prepareOutput1()
 
     return jsonObj;
 }
-
