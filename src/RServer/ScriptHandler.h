@@ -9,6 +9,9 @@
 
 class RConsole;
 class RObject;
+class JsonTableController;
+class HttpRequest;
+class HttpResponse;
 
 struct OperatorRObject {
     RObject *robj;
@@ -25,6 +28,9 @@ public:
     void loadDataFromCSV(const QString &fileName = "KAZ_data-1.csv");
     bool loadDataFromJson(const QByteArray &jsonData);
 
+    // эта функция удалится после приделки, скрипта
+    void getResponse(HttpRequest &request, HttpResponse &response);
+
     QByteArray getOutputLikeJson();
 
     bool runScript(const QString &scriptName = "");
@@ -37,6 +43,8 @@ private:
 private:
     RConsole &m_rconsole;
     OperatorRObject m_inputRObject;
+
+    JsonTableController *m_jsonTableController;
 };
 
 #endif // SCRIPTHANDLER_H

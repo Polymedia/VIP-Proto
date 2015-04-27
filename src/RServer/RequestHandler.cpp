@@ -1,19 +1,15 @@
 #include "RequestHandler.h"
 
-#include "controllers/JsonTableController.h"
 #include "ScriptHandler.h"
 
 RequestHandler::RequestHandler(RConsole *r, QObject *parent) :
-    HttpRequestHandler(parent),
-    m_jsonTableController(new JsonTableController)
+    HttpRequestHandler(parent)
 {
-    m_jsonTableController->loadData();
     m_scriptHandler = new ScriptHandler(r, this);
 }
 
 RequestHandler::~RequestHandler()
 {
-    delete m_jsonTableController;
     delete m_scriptHandler;
 }
 
@@ -31,12 +27,7 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
         // TODO: придумать "абстрактную" обработку запросов
 
         if (request.getMethod() == "GET") {
-            // TODO:
-            // здесь надо запускать реальный скрипт,
-            // который возвращает JSON массив отупут переменных
-            // сейчас заглушка, потом надо избавиться от JsonTableController
-            m_jsonTableController->setPathList(pathList);
-            m_jsonTableController->service(request, response);
+            m_scriptHandler->getResponse(request, response);
             return;
         }
 

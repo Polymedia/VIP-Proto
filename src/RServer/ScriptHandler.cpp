@@ -12,16 +12,22 @@
 #include <csvmodel.h>
 #include <rmodel.h>
 
+#include "controllers/JsonTableController.h"
+
 ScriptHandler::ScriptHandler(RConsole *r, QObject *parent):
     QObject(parent),
-    m_rconsole(*r)
+    m_rconsole(*r),
+    m_jsonTableController(new JsonTableController)
 {
+    m_jsonTableController->loadData();
+
     loadDataFromCSV();
     fillInputRObject();
 }
 
 ScriptHandler::~ScriptHandler()
 {
+    delete m_jsonTableController;
     delete m_inputRObject.robj;
 }
 
@@ -51,6 +57,11 @@ bool ScriptHandler::loadDataFromJson(const QByteArray &jsonData)
     }
 
     return false;
+}
+
+void ScriptHandler::getResponse(HttpRequest &request, HttpResponse &response)
+{
+    m_jsonTableController->service(request, response);
 }
 
 QByteArray ScriptHandler::getOutputLikeJson()

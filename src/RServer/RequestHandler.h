@@ -5,7 +5,6 @@
 
 #include <httpserver/httprequesthandler.h>
 
-class JsonTableController;
 class ScriptHandler;
 class RConsole;
 
@@ -23,8 +22,6 @@ signals:
 public slots:
 
 private:
-    JsonTableController *m_jsonTableController;
-
     ScriptHandler *m_scriptHandler;
 };
 
