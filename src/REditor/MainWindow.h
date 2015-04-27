@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QTimer>
+#include <QtGui>
+#include <QtWidgets>
 
 namespace Ui {
 class MainWindow;
@@ -16,11 +16,20 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(RConsole *r, QWidget *parent = 0);
+    MainWindow(RConsole &r, QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private:
+    void initR();
+    void clearR();
+    void setEditorFile(const QString &fileName = "");
+
+public slots:
+    void clearEditor(bool clearAll);
+
 private slots:
-    void onExecuteClicked(const QString &command = "");
+    void onCommand(const QString &command = "");
 
     void onRMessageOk(const QString &message);
     void onRMessageError(const QString &message);
@@ -29,18 +38,24 @@ private slots:
     void updatePlot();
     void printOutputBuf();
 
-private:
-    QString m_plotFilePath;
-    RConsole *m_rconsole;
+    void onNew();
+    void onOpen();
+    void onSave(bool saveAs = false);
+    void onSaveAs();
+    void onExecute();
 
-    Console *m_guiConsole;
+    void closeEvent(QCloseEvent *event);
+
+private:
+    QString m_fileName;
+    QString m_plotFilePath;
+    RConsole &m_rconsole;
+    bool m_editorTextChanged;
 
     QString m_outputBuf;
     QString m_lastOutput;
-    // Таймер, чтобы дождаться всего вывода из консоли, если он многострочный
-    QTimer m_outputTimer;
 
-    Ui::MainWindow *ui;    
+    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
