@@ -112,11 +112,14 @@ RBind RConsole::operator[](const QString &name)
 
 bool RConsole::execute(const QString &code)
 {
+    QString text = code;
+    text.replace('\"', "\\\"");
+
     ParseStatus status;
     SEXP ans, cmdSexp, cmdexpr = R_NilValue;
 
     PROTECT(cmdSexp = Rf_allocVector(STRSXP, 1));
-    SET_STRING_ELT(cmdSexp, 0, Rf_mkChar(code.toLocal8Bit().constData()));
+    SET_STRING_ELT(cmdSexp, 0, Rf_mkChar(text.toLocal8Bit().constData()));
 
     cmdexpr = PROTECT(R_ParseVector(cmdSexp, -1, &status, R_NilValue));
 
