@@ -42,6 +42,21 @@ CONFIG(release, debug|release){
     TARGET = $$RELEASE_TARGET
 }
 
+###########################
+###       DEPLOY        ###
+###########################
+
+CONFIG(release, debug|release){
+    CONFIG(DEPLOY_APPS){
+        !isEmpty(QMAKE_POST_LINK) {
+            QMAKE_POST_LINK += &&
+        }
+        QMAKE_POST_LINK += "$$DEPLOYQT \"$$DESTDIR/$${RELEASE_TARGET}.exe\" \"$$BIN/REditor\" && " \
+                           "$$VCOPY \"$$VS_LIB\" \"$$BIN\\REditor\" *.dll"
+    }
+}
+
+
 
 ###########################
 ###       SOURCE        ###

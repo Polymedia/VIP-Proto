@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QTimer>
+#include <QtGui>
+#include <QtWidgets>
 
 namespace Ui {
 class MainWindow;
@@ -16,37 +16,50 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(RConsole *r, QWidget *parent = 0);
+    MainWindow(RConsole &r, QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private:
+    void initR();
+    void clearR();
+    void setEditorFile(const QString &fileName = "");
+
+public slots:
+    void clearEditor(bool clearAll);
+
 private slots:
-    void onExecuteClicked(const QString &command = "");
+    void onCommand(const QString &command = "");
 
     void onRMessageOk(const QString &message);
     void onRMessageError(const QString &message);
+    void onRParseIncomplete();
 
     void updatePlot();
     void printOutputBuf();
-    void onWainExtaInput();
+
+    void onNew();
+    void onOpen();
+    void onSave(bool saveAs = false);
+    void onSaveAs();
+    void onExecute();
+
+    void closeEvent(QCloseEvent *event);
 
 public slots:
     void addVar(const QString &s);
     void updateVariables();
 
 private:
+    QString m_fileName;
     QString m_plotFilePath;
-    RConsole *m_rconsole;
-
-    Console *m_guiConsole;
+    RConsole &m_rconsole;
+    bool m_editorTextChanged;
 
     QString m_outputBuf;
     QString m_lastOutput;
-    // Таймер, чтобы дождаться всего вывода из консоли, если он многострочный
-    QTimer m_outputTimer;
-    // Таймер, чтобы узнать, есть ли вывод от R или нет (некоторые команды ждут дополнительный ввод)
-    QTimer m_waitOutputTimer;
 
-    Ui::MainWindow *ui;    
+    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

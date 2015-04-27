@@ -1,0 +1,29 @@
+##
+## Developer specific projects configuration
+##
+##################################################################################
+
+OTHER_FILES += \
+    !include_custom.pri.devel \
+    !include_custom.pri.teamcity
+
+##
+## Compile tests with project and
+## deploys project libs to $$TESTS_BIN (in release build)
+##
+CONFIG += INCLUDE_TESTS
+
+##
+## Deploy dependency libs for applications
+##  - relevant only for release builds
+##
+CONFIG -= DEPLOY_APPS
+
+##
+## Deploy dependency libs for tests
+##  - works only if INCLUDE_TESTS set
+##  - relevant only for release builds
+##
+CONFIG += DEPLOY_TESTS
+
+

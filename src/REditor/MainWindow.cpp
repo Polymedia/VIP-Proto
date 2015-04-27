@@ -1,42 +1,44 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include <QtCore>
+#include <QtWidgets>
+
 #include <RInside/rconsole.h>
-#include <QFile>
+#include <RInside/rmodel.h>
+#include <RInside/csvmodel.h>
 
 #include "Console.h"
-#include <QDebug>
 
-#include "rvariablewidget.h"
+const QString editorName = "REditor";
 
-MainWindow::MainWindow(RConsole *r, QWidget *parent) :
+MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     QMainWindow(parent),
     m_rconsole(r),
+    m_editorTextChanged(false),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    m_guiConsole = new Console(this);
+    ui->editor->setAcceptDrops(false);
+    ui->console->setAcceptDrops(false);
 
-    ui->horizontalLayout->insertWidget(0, m_guiConsole);
-
-    connect(m_guiConsole, SIGNAL(command(QString)), SLOT(onExecuteClicked(QString)));
-    connect(ui->btnUpdatePlot, SIGNAL(clicked()), SLOT(updatePlot()));
-    connect(&m_outputTimer, SIGNAL(timeout()), SLOT(printOutputBuf()));
-    connect(&m_waitOutputTimer, SIGNAL(timeout()), SLOT(onWainExtaInput()));
 
     // Tempolary file for R plots
     m_plotFilePath = "tmpPlot.png";
     QFile::remove(m_plotFilePath);
 
-    m_outputTimer.setInterval(50);
-    m_outputTimer.setSingleShot(true);
+    initR();
+    clearEditor(false);
 
-    m_waitOutputTimer.setInterval(75);
-    m_waitOutputTimer.setSingleShot(true);
+    ui->console->execute(QString("png(\"%1\")").arg(m_plotFilePath), true);
+
 
     ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
+    // after clear & execute png
+    connect(ui->editor, &QPlainTextEdit::textChanged, [&] () {m_editorTextChanged = true;});
+    connect(ui->console, SIGNAL(command(QString)), SLOT(onCommand(QString)));
     connect(m_guiConsole, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
 }
 
@@ -48,45 +50,80 @@ MainWindow::~MainWindow()
     QFile::remove(m_plotFilePath);
 }
 
-void MainWindow::onExecuteClicked(const QString &command)
+void MainWindow::initR()
 {
-    disconnect(m_rconsole, 0, this, 0);
-    m_rconsole->execute(QString("png(\"%1\")").arg(m_plotFilePath));
+    //Load data from csv
+    QDir inputs("inputs");
+    int counter = 0;
+    foreach (QString filename, inputs.entryList(QStringList() << "*.csv")) {
+        counter++;
+        CsvModel model;
 
-    connect(m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
-    connect(m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
+        QFile file(inputs.absoluteFilePath(filename));
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning() << "Cannot open input data file";
+            continue;
+        }
 
-    m_waitOutputTimer.start();
+        model.load(&file, ';', true);
+        m_rconsole["input" + QString::number(counter)] = RObject::fromModel(&model);
+    }
+}
 
-    m_rconsole->execute(command);
+void MainWindow::clearR()
+{
+    m_rconsole.execute("rm(list=ls()");
+}
 
-    disconnect(m_rconsole, 0, this, 0);
-    m_rconsole->execute("dev.off()");
+
+void MainWindow::setEditorFile(const QString &fileName)
+{
+    m_editorTextChanged = false;
+
+    setWindowTitle(editorName + " - " + fileName);
+    m_fileName = fileName;
+}
+
+void MainWindow::onCommand(const QString &command)
+{
+    disconnect(&m_rconsole, 0, this, 0);
+
+    connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
+    connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
+    connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
+
+    m_rconsole.execute(command);
+
+    printOutputBuf();
+    m_lastOutput.clear();
 }
 
 void MainWindow::onRMessageOk(const QString &message)
 {
-    m_waitOutputTimer.stop();
-
     m_outputBuf.append(message);
-    m_outputTimer.start();
+    m_lastOutput = message;
 }
 
 void MainWindow::onRMessageError(const QString &message)
 {
-    m_waitOutputTimer.stop();
-
-    if (message != m_outputBuf && message != m_lastOutput) {
+    if (message != m_lastOutput)
         m_outputBuf.append(message);
-        printOutputBuf();
-    }
+}
+
+void MainWindow::onRParseIncomplete()
+{
+    ui->console->extraInput();
 }
 
 void MainWindow::updatePlot()
 {
+    m_rconsole.execute("dev.off()");
+
     QImage plot;
-    if (plot.load(m_plotFilePath))
-        ui->lbPlot->setPixmap(QPixmap::fromImage(plot));
+    if (plot.load(m_plotFilePath)) {
+        QPixmap pm = QPixmap::fromImage(plot).scaled(ui->lbPlot->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        ui->lbPlot->setPixmap(pm);
+    }
 }
 
 void MainWindow::printOutputBuf()
@@ -94,29 +131,122 @@ void MainWindow::printOutputBuf()
     if (m_outputBuf.endsWith("\n"))
         m_outputBuf.chop(1);
 
-    m_guiConsole->output(m_outputBuf);
-    m_lastOutput = m_outputBuf;
+    ui->console->output(m_outputBuf);
     m_outputBuf.clear();
 }
 
-void MainWindow::onWainExtaInput()
+void MainWindow::clearEditor(bool clearAll)
 {
-    m_guiConsole->extraInput();
+    m_fileName = "";
+
+    ui->editor->clear();
+    m_editorTextChanged = false;
+
+    if (clearAll) {
+        ui->console->clear();
+        clearR();
+    }
+    setWindowTitle(editorName + " - *");
 }
 
-void MainWindow::addVar(const QString &s)
+void MainWindow::onNew()
 {
-    RVariableWidget *widget = new RVariableWidget(m_rconsole, s);
-    QListWidgetItem *newWidget = new QListWidgetItem(ui->listWidget, QListWidgetItem::UserType);
-    newWidget->setSizeHint(widget->size());
-    ui->listWidget->setItemWidget(newWidget, widget);
+    if (m_editorTextChanged) {
+        QMessageBox mb(this);
+        mb.setWindowTitle("New file");
+        mb.setText("Save current document before create new?");
+        mb.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        mb.setDefaultButton(QMessageBox::Cancel);
+
+        int res = mb.exec();
+
+        switch (res) {
+        case QMessageBox::Yes:
+            onSave();
+            clearEditor(false);
+            break;
+        case QMessageBox::No:
+            clearEditor(false);
+            break;
+        case QMessageBox::Cancel:
+        default:
+            break;
+        }
+    }
 }
 
-void MainWindow::updateVariables()
+void MainWindow::onOpen()
 {
-    for (int i = 0; i < ui->listWidget->count(); ++i) {
-        RVariableWidget *rVar = dynamic_cast<RVariableWidget *>(ui->listWidget->itemWidget(ui->listWidget->item(i)));
-        rVar->updateVar();
-        ui->listWidget->item(i)->setSizeHint(rVar->size());
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    "Open file",
+                                                    QDir::homePath(),
+                                                    "R files" + QString(" (*.r *.txt)"));
+
+    if (!fileName.isEmpty()) {
+        QFile file(fileName);
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        ui->editor->setPlainText(file.readAll());
+
+        setEditorFile(fileName);
+    }
+}
+
+void MainWindow::onSave(bool saveAs)
+{
+    QString fileName;
+    if (saveAs || m_fileName.isEmpty()) {
+        fileName = QFileDialog::getSaveFileName(this,
+                                                "Save file",
+                                                QDir::homePath(),
+                                                "R files" + QString(" (*.r *.txt)"));
+        if (fileName.isEmpty())
+            return;
+
+        m_fileName = fileName;
+    }
+
+    QFile file(m_fileName);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    file.write(ui->editor->toPlainText().toLocal8Bit().data());
+
+    setEditorFile(m_fileName);
+}
+
+void MainWindow::onSaveAs()
+{
+    onSave(true);
+
+}
+
+void MainWindow::onExecute()
+{
+    initR();
+    ui->console->execute(ui->editor->toPlainText(), true);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (m_editorTextChanged) {
+        QMessageBox mb(this);
+        mb.setWindowTitle("Exit?");
+        mb.setText("Save current document before exit?");
+        mb.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        mb.setDefaultButton(QMessageBox::Cancel);
+
+        int res = mb.exec();
+
+        switch (res) {
+        case QMessageBox::Yes:
+            onSave();
+            event->accept();
+            break;
+        case QMessageBox::No:
+            event->accept();
+            break;
+        case QMessageBox::Cancel:
+            event->ignore();
+        default:
+            break;
+        }
     }
 }

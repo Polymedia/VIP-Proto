@@ -58,5 +58,19 @@
 	###     SETUP OUTPUT    ###
 	###########################
 	DESTDIR += $$TESTS_BIN
+
+        ###########################
+        ###       DEPLOY        ###
+        ###########################
+
+        CONFIG(release, debug|release){
+            CONFIG(DEPLOY_TESTS) {
+                !isEmpty(QMAKE_POST_LINK) {
+                    QMAKE_POST_LINK += &&
+                }
+                QMAKE_POST_LINK += "$$DEPLOYQT \"$$DESTDIR/$${TARGET}.exe\" \"$$TESTS_BIN\" && " \
+                                   "$$VCOPY \"$$VS_LIB\" \"$$TESTS_BIN\" *.dll"
+            }
+        }
 }
 # End Include checking
