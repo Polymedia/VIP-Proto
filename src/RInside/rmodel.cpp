@@ -67,7 +67,7 @@ QVariant RModel::data(const QModelIndex &index, int role) const
         return row.value(index.row());
     }
     case RObject::Matrix: {
-        int offset = index.row() * columnCount(index) + index.column();
+        int offset = index.column() * rowCount(index) + index.row();
         return m_object.value(offset);
     }
     case RObject::List: {
@@ -77,7 +77,7 @@ QVariant RModel::data(const QModelIndex &index, int role) const
         return row.value(index.column());
     }
     case RObject::Array: {
-        int offset = index.row() * columnCount(index) + index.column();
+        int offset = index.column() * rowCount(index) + index.row();
         return m_object.value(offset);
     }
     case RObject::Vector:
