@@ -20,10 +20,15 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    centralWidget()->setMaximumSize(1,1);
-
     ui->editor->setAcceptDrops(false);
     ui->console->setAcceptDrops(false);
+
+    // для dock widgets нужен centralWidget. скрываем его установив размер (1,1)
+    // для правильной работы виджетов распологаем их в две строки, поделенные пополам
+    // editorDock  | envDock
+    // consoleDock | graphicsDock
+
+    centralWidget()->setMaximumSize(1,1);
 
     splitDockWidget(ui->editorDock, ui->envDock, Qt::Horizontal);
     splitDockWidget(ui->consoleDock, ui->graphicsDock, Qt::Horizontal);
