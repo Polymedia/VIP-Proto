@@ -39,6 +39,11 @@ private:
     void fillInputRObject();
 
     QJsonObject prepareOutput1();
+    QJsonObject prepareOutput2();
+    QJsonObject prepareOutput3();
+    QJsonObject prepareOutput4();
+    QJsonObject prepareOutput5();
+
 
 private:
     RConsole &m_rconsole;

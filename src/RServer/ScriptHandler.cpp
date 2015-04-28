@@ -71,6 +71,17 @@ QByteArray ScriptHandler::getOutputLikeJson()
     QJsonObject returnObj1 = prepareOutput1();
     returnArr.append(returnObj1);
 
+    QJsonObject returnObj2 = prepareOutput2();
+    returnArr.append(returnObj2);
+
+    QJsonObject returnObj3 = prepareOutput3();
+    returnArr.append(returnObj3);
+
+    QJsonObject returnObj4 = prepareOutput4();
+    returnArr.append(returnObj4);
+
+    QJsonObject returnObj5 = prepareOutput5();
+    returnArr.append(returnObj5);
     return QJsonDocument(returnArr).toJson();
 }
 
@@ -145,6 +156,136 @@ QJsonObject ScriptHandler::prepareOutput1()
     editMaskArr.append(arr2);
 
     jsonObj.insert("editMask", editMaskArr);
+
+    return jsonObj;
+}
+
+QJsonObject ScriptHandler::prepareOutput2()
+{
+    QJsonObject jsonObj;
+    //obj.insert("id", QJsonValue(OUTPUT2_NAME));
+
+
+
+    RObject robj = m_rconsole[OUTPUT2_NAME];
+
+    QJsonArray headersArray, rowsArray, valuesArray;
+    RObject headers = robj.attribute("names");
+
+    for (int j = 0; j < robj.length(); j++)
+        headersArray.append(QJsonValue(headers.value(j).toString()));
+
+    for (int j = 0; j < robj.attribute("row.names").length(); j++)
+        rowsArray.append(QJsonValue(robj.attribute("row.names").value(j).toString()));
+
+    RModel firstWidgetModel(robj);
+    for (int i = 0; i < firstWidgetModel.rowCount(); i++) {
+        QJsonArray row;
+        for (int j = 0; j < firstWidgetModel.columnCount(); j++)
+            row.append(QJsonValue(firstWidgetModel.data(firstWidgetModel.index(i, j)).toDouble()));
+
+        valuesArray.append(row);
+    }
+
+    jsonObj.insert("headers", headersArray);
+    jsonObj.insert("rows", rowsArray);
+    jsonObj.insert("values", valuesArray);
+    jsonObj.insert("id", OUTPUT2_NAME);
+
+
+
+
+
+
+    return jsonObj;
+}
+
+QJsonObject ScriptHandler::prepareOutput3()
+{
+    QJsonObject obj;
+    obj.insert("id", QJsonValue(OUTPUT3_NAME));
+
+    QJsonArray headersArray, rowsArray, valuesArray;
+    headersArray.append(QJsonValue("Header"));
+    rowsArray.append(QJsonValue("Row"));
+
+    RObject robj = m_rconsole[OUTPUT3_NAME];
+
+    QJsonArray val;
+    val.append(QJsonValue(robj.value().toInt()));
+    valuesArray.append(val);
+
+    //obj.insert("value", robj.value().toInt());
+    obj.insert("rows", rowsArray);
+    obj.insert("headers", headersArray);
+    obj.insert("values", valuesArray);
+
+    return obj;
+}
+
+QJsonObject ScriptHandler::prepareOutput4()
+{
+    QJsonObject jsonObj;
+    RObject robj = m_rconsole[OUTPUT4_NAME];
+
+    QJsonArray headersArray, rowsArray, valuesArray;
+    RObject headers = robj.attribute("names");
+
+    for (int j = 0; j < robj.length(); j++)
+        headersArray.append(QJsonValue(headers.value(j).toString()));
+
+    for (int j = 0; j < robj.attribute("row.names").length(); j++)
+        rowsArray.append(QJsonValue(robj.attribute("row.names").value(j).toString()));
+
+    RModel firstWidgetModel(robj);
+    for (int i = 0; i < firstWidgetModel.rowCount(); i++) {
+        QJsonArray row;
+        for (int j = 0; j < firstWidgetModel.columnCount(); j++)
+            row.append(QJsonValue(firstWidgetModel.data(firstWidgetModel.index(i, j)).toDouble()));
+
+        valuesArray.append(row);
+    }
+
+    jsonObj.insert("headers", headersArray);
+    jsonObj.insert("rows", rowsArray);
+    jsonObj.insert("values", valuesArray);
+    jsonObj.insert("id", OUTPUT4_NAME);
+
+    return jsonObj;
+}
+
+QJsonObject ScriptHandler::prepareOutput5()
+{
+    QJsonObject jsonObj;
+
+    jsonObj.insert("id", QJsonValue(OUTPUT5_NAME));
+
+    RObject robj = m_rconsole[OUTPUT5_NAME];
+
+    QJsonArray headersArray, rowsArray, valuesArray;
+    RObject headers = robj.attribute("names");
+
+    for (int j = 0; j < robj.length(); j++) {
+        headersArray.append(QJsonValue(headers.value(j).toString()));
+        qDebug() << headers.value(j).toString();
+    }
+
+    for (int j = 0; j < robj.attribute("row.names").length(); j++)
+        rowsArray.append(QJsonValue(robj.attribute("row.names").value(j).toString()));
+
+    RModel firstWidgetModel(robj);
+    for (int i = 0; i < firstWidgetModel.rowCount(); i++) {
+        QJsonArray row;
+        for (int j = 0; j < firstWidgetModel.columnCount(); j++) {
+            qDebug() << firstWidgetModel.data(firstWidgetModel.index(i, j));
+            row.append(QJsonValue::fromVariant(firstWidgetModel.data(firstWidgetModel.index(i, j))));
+        }
+
+        valuesArray.append(row);
+    }
+    jsonObj.insert("headers", headersArray);
+    jsonObj.insert("rows", rowsArray);
+    jsonObj.insert("values", valuesArray);
 
     return jsonObj;
 }
