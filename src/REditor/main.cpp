@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     RConsole r(true);
 
     MainWindow w(r);
-    w.show();
+    w.showmebaby();
 
     return a.exec();
 }
