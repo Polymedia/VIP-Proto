@@ -77,6 +77,9 @@ void MainWindow::initR()
 
         model.load(&file, ';', true);
         m_rconsole["input" + QString::number(counter)] = RObject::fromModel(&model);
+        QString inVarName = "In_" + QString::number(counter);
+        m_rconsole[inVarName] = RObject::fromModel(&model);
+        addVar(inVarName);
     }
 }
 
