@@ -98,6 +98,24 @@ void MainWindow::onCommand(const QString &command)
     m_lastOutput.clear();
 }
 
+void MainWindow::addVar(const QString &s)
+{
+    RVariableWidget *widget = new RVariableWidget(&m_rconsole, s);
+    QListWidgetItem *newWidget = new QListWidgetItem(ui->listWidget, QListWidgetItem::UserType);
+    newWidget->setSizeHint(widget->size());
+    ui->listWidget->setItemWidget(newWidget, widget);
+}
+
+void MainWindow::updateVariables()
+{
+    for (int i = 0; i < ui->listWidget->count(); ++i)
+    {
+        RVariableWidget *rVar = dynamic_cast<RVariableWidget *>(ui->listWidget->itemWidget(ui->listWidget->item(i)));
+        rVar->updateVar();
+        ui->listWidget->item(i)->setSizeHint(rVar->size());
+    }
+}
+
 void MainWindow::onRMessageOk(const QString &message)
 {
     m_outputBuf.append(message);

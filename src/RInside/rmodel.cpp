@@ -132,7 +132,7 @@ bool RModel::setData(const QModelIndex &index, const QVariant &value, int role)
         break;
     }
     case RObject::Matrix: {
-        int offset = index.row() * columnCount(index) + index.column();
+        int offset = index.column() * rowCount(index) + index.row();
         m_object.setValue(value, offset);
         break;
     }
@@ -142,7 +142,7 @@ bool RModel::setData(const QModelIndex &index, const QVariant &value, int role)
         break;
     }
     case RObject::Array: {
-        int offset = index.row() * columnCount(index) + index.column();
+        int offset = index.column() * rowCount(index) + index.row();
         m_object.setValue(value, offset);
         break;
     }
