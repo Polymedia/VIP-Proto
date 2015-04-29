@@ -12,6 +12,8 @@
 #include <csvmodel.h>
 #include <rmodel.h>
 
+#include <QTableWidget>
+
 #include "controllers/JsonTableController.h"
 
 ScriptHandler::ScriptHandler(RConsole *r, QObject *parent):
@@ -21,8 +23,12 @@ ScriptHandler::ScriptHandler(RConsole *r, QObject *parent):
 {
     m_jsonTableController->loadData();
 
+    m_inputRObject.name = INPUT_FROM_DASHBOARD1_NAME;
+
     loadDataFromCSV();
-    fillInputRObject();
+
+    connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onErr(QString)));
+    connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onOut(QString)));
 }
 
 ScriptHandler::~ScriptHandler()
@@ -47,17 +53,13 @@ void ScriptHandler::loadDataFromCSV(const QString &fileName)
 
 bool ScriptHandler::loadDataFromJson(const QByteArray &jsonData)
 {
+    qDebug() << "loadDataFromJson start";
     RObject newObj = RObject::fromJsonObject(jsonData);
 
-    if (newObj.columns() == m_inputRObject.robj->columns()
-            && newObj.rows() == m_inputRObject.robj->rows()) {
-        m_inputRObject.robj = &newObj;
-        m_rconsole[m_inputRObject.name] = newObj;
+    m_inputRObject.robj = &newObj;
+    m_rconsole[m_inputRObject.name] = newObj;
 
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void ScriptHandler::getResponse(HttpRequest &request, HttpResponse &response)
@@ -82,7 +84,8 @@ QByteArray ScriptHandler::getOutputLikeJson()
 
     QJsonObject returnObj5 = prepareOutput5();
     returnArr.append(returnObj5);
-    return QJsonDocument(returnArr).toJson();
+
+    return QJsonDocument(returnArr).toJson(QJsonDocument::Compact);
 }
 
 bool ScriptHandler::runScript(const QString &scriptName)
@@ -95,22 +98,20 @@ bool ScriptHandler::runScript(const QString &scriptName)
         return false;
 
     QTextStream textStream(&scriptFile);
+    //textStream.setCodec("UTF-8");
+
     QString line;
+    int i = 0;
     do {
+        i++;
         line = textStream.readLine();
         ok &= m_rconsole.execute(line);
+        //qDebug() << i << ok << line;
+        //if (!ok)
+        qDebug() << i << ok << line;
     } while (!textStream.atEnd());
 
     return ok;
-}
-
-void ScriptHandler::fillInputRObject()
-{
-    m_inputRObject.name = INPUT_FROM_DASHBOARD1_NAME;
-    RObject *obj = new RObject(RObject::Frame, RObject::Float, 4, 4);
-    obj->fill(-1);
-    m_inputRObject.robj = obj;
-    m_rconsole[m_inputRObject.name] = *m_inputRObject.robj;
 }
 
 QJsonObject ScriptHandler::prepareOutput1()
@@ -163,9 +164,6 @@ QJsonObject ScriptHandler::prepareOutput1()
 QJsonObject ScriptHandler::prepareOutput2()
 {
     QJsonObject jsonObj;
-    //obj.insert("id", QJsonValue(OUTPUT2_NAME));
-
-
 
     RObject robj = m_rconsole[OUTPUT2_NAME];
 
@@ -192,11 +190,6 @@ QJsonObject ScriptHandler::prepareOutput2()
     jsonObj.insert("values", valuesArray);
     jsonObj.insert("id", OUTPUT2_NAME);
 
-
-
-
-
-
     return jsonObj;
 }
 
@@ -215,7 +208,6 @@ QJsonObject ScriptHandler::prepareOutput3()
     val.append(QJsonValue(robj.value().toInt()));
     valuesArray.append(val);
 
-    //obj.insert("value", robj.value().toInt());
     obj.insert("rows", rowsArray);
     obj.insert("headers", headersArray);
     obj.insert("values", valuesArray);
@@ -267,25 +259,36 @@ QJsonObject ScriptHandler::prepareOutput5()
 
     for (int j = 0; j < robj.length(); j++) {
         headersArray.append(QJsonValue(headers.value(j).toString()));
-        qDebug() << headers.value(j).toString();
     }
 
-    for (int j = 0; j < robj.attribute("row.names").length(); j++)
-        rowsArray.append(QJsonValue(robj.attribute("row.names").value(j).toString()));
 
-    RModel firstWidgetModel(robj);
-    for (int i = 0; i < firstWidgetModel.rowCount(); i++) {
-        QJsonArray row;
-        for (int j = 0; j < firstWidgetModel.columnCount(); j++) {
-            qDebug() << firstWidgetModel.data(firstWidgetModel.index(i, j));
-            row.append(QJsonValue::fromVariant(firstWidgetModel.data(firstWidgetModel.index(i, j))));
-        }
+    RModel fifthtWidgetModel(robj);
+    QJsonArray val;
+    for (int i = 0; i < fifthtWidgetModel.rowCount(); i++) {
+        rowsArray.append(QJsonValue::fromVariant(fifthtWidgetModel.data(fifthtWidgetModel.index(i, 0))));
+        val.append(QJsonValue::fromVariant(fifthtWidgetModel.data(fifthtWidgetModel.index(i, 1))));
 
-        valuesArray.append(row);
+        //qDebug() << fifthtWidgetModel.data(fifthtWidgetModel.index(i, 0));
+        //robj.data(0).value(i);
+        int k = robj.data(0).value(i).toInt() - 1;
+        qDebug() << robj.data(0).attribute("levels").value(k);
     }
+
+    valuesArray.append(val);
+
     jsonObj.insert("headers", headersArray);
     jsonObj.insert("rows", rowsArray);
     jsonObj.insert("values", valuesArray);
 
     return jsonObj;
+}
+
+void ScriptHandler::onErr(const QString &err)
+{
+    qDebug() << "ERR" << err;
+}
+
+void ScriptHandler::onOut(const QString &out)
+{
+    //qDebug() << "OUT" << out;
 }

@@ -15,7 +15,9 @@ RELEASE_TARGET = RServer
 ###      LINK LIBS      ###
 ###########################
 # Qt
-QT += core network
+QT += core network gui widgets
+
+CONFIG += console
 
 # R Inside
 INCLUDEPATH += $$SRC/RInside

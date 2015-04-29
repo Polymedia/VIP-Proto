@@ -20,39 +20,46 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
     if (pathList.last().isEmpty())
         pathList.removeLast();
 
+    qDebug() << request.getPath();
+    qDebug() << request.getMethod();
+    qDebug() << request.getHeaderMap();
+    qDebug() << request.getBody();
+
     pathList.removeFirst();
 
     // Первый параметр отвечает за версию протокола
     if (pathList.length() > 1) {
         // TODO: придумать "абстрактную" обработку запросов
 
-        if (request.getMethod() == "GET") {
-            m_scriptHandler->getResponse(request, response);
-            return;
-        }
+        response.setHeader("Content-Type", "application/json; charset=utf-8");
 
         if (request.getMethod() == "POST") {
-            bool ok = m_scriptHandler->loadDataFromJson(request.getBody());
+            qDebug() << "satart POST";
 
+            bool ok = m_scriptHandler->loadDataFromJson(request.getBody());
             if (!ok) {
                 response.setStatus(400, "Bad input");
                 response.write("Bad input", true);
                 return;
             }
+            qDebug() << "loadDataFromJson was ok";
+        }
 
-            ok = m_scriptHandler->runScript();
-
-            if (!ok) {
-                response.setStatus(500, "Script error");
-                response.write("Script error", true);
-                return;
-            }
-
-            QByteArray output = m_scriptHandler->getOutputLikeJson();
-            response.write(output, true);
+        bool ok = m_scriptHandler->runScript();
+        if (!ok) {
+            response.setStatus(500, "Script error");
+            response.write("Script error", true);
             return;
         }
+
+        qDebug() << "runScript was ok";
+        QByteArray output = m_scriptHandler->getOutputLikeJson();
+        qDebug() << "output=" << output;
+
+        response.write(output, true);
+        return;
     } else {
+        qDebug() << "DAFAULT ?";
         HttpRequestHandler::service(request, response);
     }
 }
