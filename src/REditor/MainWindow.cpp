@@ -23,6 +23,15 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     ui->editor->setAcceptDrops(false);
     ui->console->setAcceptDrops(false);
 
+    // для dock widgets нужен centralWidget. скрываем его установив размер (1,1)
+    // для правильной работы виджетов распологаем их в две строки, поделенные пополам
+    // editorDock  | envDock
+    // consoleDock | graphicsDock
+
+    centralWidget()->setMaximumSize(1,1);
+
+    splitDockWidget(ui->editorDock, ui->envDock, Qt::Horizontal);
+    splitDockWidget(ui->consoleDock, ui->graphicsDock, Qt::Horizontal);
 
     // Tempolary file for R plots
     m_plotFilePath = "tmpPlot.png";
@@ -218,6 +227,23 @@ void MainWindow::onExecute()
 {
     initR();
     ui->console->execute(ui->editor->toPlainText(), true);
+}
+
+void MainWindow::onDockToggle(bool checked)
+{
+    QObject *object = sender();
+
+    if (object == ui->actionEditor)
+        ui->editorDock->setVisible(checked);
+
+    else if (object == ui->actionConsole)
+        ui->consoleDock->setVisible(checked);
+
+    else if (object == ui->actionGraphics)
+        ui->graphicsDock->setVisible(checked);
+
+    else if (object == ui->actionEnvironment)
+        ui->envDock->setVisible(checked);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
