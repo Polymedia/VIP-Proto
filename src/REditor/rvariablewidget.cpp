@@ -43,11 +43,11 @@ void RVariableWidget::updateVar()
 }
 
 //TODO: отдельно счить есть header или нет
-#include <QDebug>
 
 void RVariableWidget::updateSize()
 {
     int rowHeight = m_view->rowHeight(0) != 0 ? m_view->rowHeight(0) : 50; // если пустая таблица
+
     int modelHeight = (1 + m_model->rowCount()) * rowHeight + ui->labelName->height() + ui->VLayout->spacing() * 3;
     int newHeight = MAX_ITEM_HEIGHT < modelHeight ? MAX_ITEM_HEIGHT : modelHeight;
 
