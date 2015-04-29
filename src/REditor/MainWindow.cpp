@@ -9,6 +9,7 @@
 #include <RInside/csvmodel.h>
 
 #include "Console.h"
+#include "rvariablewidget.h"
 
 const QString editorName = "REditor";
 
@@ -39,7 +40,6 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     // after clear & execute png
     connect(ui->editor, &QPlainTextEdit::textChanged, [&] () {m_editorTextChanged = true;});
     connect(ui->console, SIGNAL(command(QString)), SLOT(onCommand(QString)));
-    connect(m_guiConsole, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
     connect(ui->console, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
 }
 
@@ -241,6 +241,8 @@ void MainWindow::onExecute()
 {
     initR();
     ui->console->execute(ui->editor->toPlainText(), true);
+
+    updateVariables();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
