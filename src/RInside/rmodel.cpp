@@ -28,6 +28,7 @@ int RModel::rowCount(const QModelIndex &/*parent*/) const
         RObject dims = m_object.attribute("dim");
         return dims.value(0).toInt() * dims.value(2).toInt();
     }
+    case RObject::Factor:
     case RObject::Vector:
         return m_object.length();
     default:
@@ -88,7 +89,12 @@ QVariant RModel::data(const QModelIndex &index, int role) const
     }
     case RObject::Factor: {
         int factor = m_object.value(index.row()).toInt();
-        return m_object.attribute("levels").value(factor - 1);
+        RObject levels = m_object.attribute("levels");
+
+        if (factor - 1 > levels.length() || factor - 1 < 0)
+            return "NaN";
+        
+        return levels.value(factor - 1);
     }
     case RObject::Vector:
         return m_object.value(index.row());
