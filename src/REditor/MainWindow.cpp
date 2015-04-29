@@ -40,6 +40,7 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     connect(ui->editor, &QPlainTextEdit::textChanged, [&] () {m_editorTextChanged = true;});
     connect(ui->console, SIGNAL(command(QString)), SLOT(onCommand(QString)));
     connect(m_guiConsole, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
+    connect(ui->console, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
 }
 
 MainWindow::~MainWindow()
