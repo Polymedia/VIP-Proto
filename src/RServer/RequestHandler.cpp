@@ -20,11 +20,6 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
     if (pathList.last().isEmpty())
         pathList.removeLast();
 
-    qDebug() << request.getPath();
-    qDebug() << request.getMethod();
-    qDebug() << request.getHeaderMap();
-    qDebug() << request.getBody();
-
     pathList.removeFirst();
 
     // Первый параметр отвечает за версию протокола
@@ -34,15 +29,12 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
         response.setHeader("Content-Type", "application/json; charset=utf-8");
 
         if (request.getMethod() == "POST") {
-            qDebug() << "satart POST";
-
             bool ok = m_scriptHandler->loadDataFromJson(request.getBody());
             if (!ok) {
                 response.setStatus(400, "Bad input");
                 response.write("Bad input", true);
                 return;
             }
-            qDebug() << "loadDataFromJson was ok";
         }
 
         bool ok = m_scriptHandler->runScript();
@@ -52,14 +44,11 @@ void RequestHandler::service(HttpRequest &request, HttpResponse &response)
             return;
         }
 
-        qDebug() << "runScript was ok";
         QByteArray output = m_scriptHandler->getOutputLikeJson();
-        qDebug() << "output=" << output;
 
         response.write(output, true);
         return;
     } else {
-        qDebug() << "DAFAULT ?";
         HttpRequestHandler::service(request, response);
     }
 }

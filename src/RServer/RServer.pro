@@ -15,7 +15,7 @@ RELEASE_TARGET = RServer
 ###      LINK LIBS      ###
 ###########################
 # Qt
-QT += core network gui widgets
+QT += core network
 
 CONFIG += console
 

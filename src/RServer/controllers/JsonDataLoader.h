@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QJsonDocument>
-#include <QList>
 
 class JsonDataLoader : public QObject
 {

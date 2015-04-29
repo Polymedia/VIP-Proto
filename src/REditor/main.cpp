@@ -6,9 +6,6 @@
 
 #include <RInside/rconsole.h>
 
-#include <RInside/csvmodel.h>
-#include <RInside/rmodel.h>
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -17,10 +14,6 @@ int main(int argc, char *argv[])
 
     MainWindow w(r);
     w.show();
-
-
-
-
 
     return a.exec();
 }

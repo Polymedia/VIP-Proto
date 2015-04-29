@@ -12,7 +12,6 @@
 #include <csvmodel.h>
 #include <rmodel.h>
 
-#include <QTableWidget>
 
 #include "controllers/JsonTableController.h"
 
@@ -53,7 +52,6 @@ void ScriptHandler::loadDataFromCSV(const QString &fileName)
 
 bool ScriptHandler::loadDataFromJson(const QByteArray &jsonData)
 {
-    qDebug() << "loadDataFromJson start";
     RObject newObj = RObject::fromJsonObject(jsonData);
 
     m_inputRObject.robj = &newObj;
@@ -98,7 +96,6 @@ bool ScriptHandler::runScript(const QString &scriptName)
         return false;
 
     QTextStream textStream(&scriptFile);
-    //textStream.setCodec("UTF-8");
 
     QString line;
     int i = 0;
@@ -106,9 +103,6 @@ bool ScriptHandler::runScript(const QString &scriptName)
         i++;
         line = textStream.readLine();
         ok &= m_rconsole.execute(line);
-        //qDebug() << i << ok << line;
-        //if (!ok)
-        qDebug() << i << ok << line;
     } while (!textStream.atEnd());
 
     return ok;
@@ -267,11 +261,6 @@ QJsonObject ScriptHandler::prepareOutput5()
     for (int i = 0; i < fifthtWidgetModel.rowCount(); i++) {
         rowsArray.append(QJsonValue::fromVariant(fifthtWidgetModel.data(fifthtWidgetModel.index(i, 0))));
         val.append(QJsonValue::fromVariant(fifthtWidgetModel.data(fifthtWidgetModel.index(i, 1))));
-
-        //qDebug() << fifthtWidgetModel.data(fifthtWidgetModel.index(i, 0));
-        //robj.data(0).value(i);
-        int k = robj.data(0).value(i).toInt() - 1;
-        qDebug() << robj.data(0).attribute("levels").value(k);
     }
 
     valuesArray.append(val);
