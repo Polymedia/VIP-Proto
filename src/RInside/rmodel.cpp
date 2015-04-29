@@ -18,6 +18,12 @@ int RModel::rowCount(const QModelIndex &/*parent*/) const
         return m_object.attribute("row.names").length();
     case RObject::Matrix:
         return m_object.rows();
+    case RObject::List: {
+        int rows = 0;
+        for (int i = 0; i < m_object.length(); ++i)
+            rows = qMax(rows, m_object.data(i).length());
+        return rows;
+    }
     case RObject::Array: {
         RObject dims = m_object.attribute("dim");
         return dims.value(0).toInt() * dims.value(2).toInt();
@@ -37,12 +43,8 @@ int RModel::columnCount(const QModelIndex &/*parent*/) const
         return m_object.attribute("names").length();
     case RObject::Matrix:
         return m_object.columns();
-    case RObject::List: {
-        int columns = 0;
-        for (int i = 0; i < m_object.length(); ++i)
-            columns = qMax(columns, m_object.data(i).length());
-        return columns;
-    }
+    case RObject::List:
+        return m_object.length();
     case RObject::Array: {
         RObject dims = m_object.attribute("dim");
         return dims.value(1).toInt();
@@ -63,22 +65,30 @@ QVariant RModel::data(const QModelIndex &index, int role) const
     switch (m_object.storage())
     {
     case RObject::Frame: {
-        RObject row = m_object.data(index.column());
-        return row.value(index.row());
+        RObject column = m_object.data(index.column());
+        if (column.storage() == RObject::Factor) {
+            int factor = column.value(index.row()).toInt();
+            return column.attribute("levels").value(factor - 1);
+        } else
+            return column.value(index.row());
     }
     case RObject::Matrix: {
         int offset = index.column() * rowCount(index) + index.row();
         return m_object.value(offset);
     }
     case RObject::List: {
-        RObject row = m_object.data(index.row());
-        if (index.column() >= row.length())
+        RObject column = m_object.data(index.column());
+        if (index.row() >= column.length())
             return QVariant("NaN");
-        return row.value(index.column());
+        return column.value(index.row());
     }
     case RObject::Array: {
         int offset = index.column() * rowCount(index) + index.row();
         return m_object.value(offset);
+    }
+    case RObject::Factor: {
+        int factor = m_object.value(index.row()).toInt();
+        return m_object.attribute("levels").value(factor - 1);
     }
     case RObject::Vector:
         return m_object.value(index.row());
@@ -98,6 +108,13 @@ QVariant RModel::headerData(int section, Qt::Orientation orientation, int role) 
         return columns.value(section);
     }
 
+    if (m_object.storage() == RObject::List) {
+        if (orientation == Qt::Horizontal) {
+            RObject columns = m_object.attribute("names");
+            return columns.value(section);
+        }
+    }
+
     return QString::number(section + 1);
 }
 
@@ -109,8 +126,8 @@ Qt::ItemFlags RModel::flags(const QModelIndex &index) const
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     if (m_object.storage() == RObject::List) {
-        RObject row = m_object.data(index.row());
-        if (index.column() < row.length())
+        RObject column = m_object.data(index.column());
+        if (index.row() < column.length())
             flags |= Qt::ItemIsEditable;
     }
     else
@@ -127,8 +144,12 @@ bool RModel::setData(const QModelIndex &index, const QVariant &value, int role)
     switch (m_object.storage())
     {
     case RObject::Frame: {
-        RObject row = m_object.data(index.column());
-        row.setValue(value, index.row());
+        RObject column = m_object.data(index.column());
+        if (column.storage() == RObject::Factor) {
+            int factor = column.value(index.row()).toInt();
+            column.attribute("levels").setValue(value, factor - 1);
+        } else
+            column.setValue(value, index.row());
         break;
     }
     case RObject::Matrix: {
@@ -137,13 +158,18 @@ bool RModel::setData(const QModelIndex &index, const QVariant &value, int role)
         break;
     }
     case RObject::List: {
-        RObject row = m_object.data(index.row());
-        row.setValue(value, index.column());
+        RObject column = m_object.data(index.column());
+        column.setValue(value, index.row());
         break;
     }
     case RObject::Array: {
         int offset = index.column() * rowCount(index) + index.row();
         m_object.setValue(value, offset);
+        break;
+    }
+    case RObject::Factor: {
+        int factor = m_object.value(index.row()).toInt();
+        m_object.attribute("levels").setValue(value, factor - 1);
         break;
     }
     case RObject::Vector:

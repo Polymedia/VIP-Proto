@@ -304,13 +304,16 @@ RObject::RStorage RObject::evalStorage(SEXP object)
     if (Rf_isMatrix(object))
         return Matrix;
 
-    if (Rf_isList(object) || Rf_isNewList(m_object))
+    if (Rf_isList(object) || Rf_isNewList(object))
         return List;
 
-    if (Rf_isArray(m_object))
+    if (Rf_isArray(object))
         return Array;
 
-    if (Rf_isVector(m_object))
+    if (Rf_isFactor(object))
+        return Factor;
+
+    if (Rf_isVector(object))
         return Vector;
 
     return Other;
