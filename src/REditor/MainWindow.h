@@ -43,6 +43,7 @@ private slots:
     void onSave(bool saveAs = false);
     void onSaveAs();
     void onExecute();
+    void onDockToggle(bool checked);
 
     void closeEvent(QCloseEvent *event);
 
