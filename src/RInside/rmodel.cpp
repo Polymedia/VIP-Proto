@@ -63,8 +63,12 @@ QVariant RModel::data(const QModelIndex &index, int role) const
     switch (m_object.storage())
     {
     case RObject::Frame: {
-        RObject row = m_object.data(index.column());
-        return row.value(index.row());
+        RObject column = m_object.data(index.column());
+        if (column.storage() == RObject::Factor) {
+            int factor = column.value(index.row()).toInt();
+            return column.attribute("levels").value(factor - 1);
+        } else
+            return column.value(index.row());
     }
     case RObject::Matrix: {
         int offset = index.row() * columnCount(index) + index.column();
@@ -79,6 +83,10 @@ QVariant RModel::data(const QModelIndex &index, int role) const
     case RObject::Array: {
         int offset = index.row() * columnCount(index) + index.column();
         return m_object.value(offset);
+    }
+    case RObject::Factor: {
+        int factor = m_object.value(index.row()).toInt();
+        return m_object.attribute("levels").value(factor - 1);
     }
     case RObject::Vector:
         return m_object.value(index.row());
