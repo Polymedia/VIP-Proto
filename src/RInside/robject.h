@@ -21,6 +21,7 @@ public:
         Matrix,
         List,
         Array,
+        Factor,
         Vector,
         Other
     };
