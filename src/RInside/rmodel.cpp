@@ -89,10 +89,6 @@ QVariant RModel::data(const QModelIndex &index, int role) const
     }
     case RObject::Factor: {
         int factor = m_object.value(index.row()).toInt();
-        return m_object.attribute("levels").value(factor - 1);
-    }
-    case RObject::Factor: {
-        int factor = m_object.value(index.row()).toInt();
         RObject levels = m_object.attribute("levels");
 
         if (factor - 1 > levels.length() || factor - 1 < 0)

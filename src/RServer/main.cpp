@@ -1,5 +1,3 @@
-#include <QApplication>
-
 #include <httpserver/httplistener.h>
 #include <rconsole.h>
 
