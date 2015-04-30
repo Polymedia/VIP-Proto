@@ -47,6 +47,10 @@ private slots:
 
     void closeEvent(QCloseEvent *event);
 
+public slots:
+    void addVar(const QString &s);
+    void updateVariables();
+
 private:
     QString m_fileName;
     QString m_plotFilePath;

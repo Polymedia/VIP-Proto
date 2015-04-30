@@ -47,6 +47,7 @@ private:
 signals:
     void command(QString);
     void commandStringChanged(QString);
+    void enterPressed();
 };
 
 #endif // CONSOLE_H
