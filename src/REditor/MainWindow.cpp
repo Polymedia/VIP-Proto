@@ -98,11 +98,12 @@ void MainWindow::onCommand(const QString &command)
 {
     disconnect(&m_rconsole, 0, this, 0);
 
+    m_rconsole.execute(QString("png(\"%1\")").arg(m_plotFilePath));
+
     connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
     connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
     connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
 
-    m_rconsole.execute(QString("png(\"%1\")").arg(m_plotFilePath));
     m_rconsole.execute(command);
 
     printOutputBuf();
