@@ -43,8 +43,13 @@ private slots:
     void onSave(bool saveAs = false);
     void onSaveAs();
     void onExecute();
+    void onDockToggle(bool checked);
 
     void closeEvent(QCloseEvent *event);
+
+public slots:
+    void addVar(const QString &s);
+    void updateVariables();
 
 private:
     QString m_fileName;

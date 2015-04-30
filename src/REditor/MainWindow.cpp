@@ -9,6 +9,7 @@
 #include <RInside/csvmodel.h>
 
 #include "Console.h"
+#include "rvariablewidget.h"
 
 const QString editorName = "REditor";
 
@@ -23,6 +24,15 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     ui->editor->setAcceptDrops(false);
     ui->console->setAcceptDrops(false);
 
+    // для dock widgets нужен centralWidget. скрываем его установив размер (1,1)
+    // для правильной работы виджетов распологаем их в две строки, поделенные пополам
+    // editorDock  | envDock
+    // consoleDock | graphicsDock
+
+    centralWidget()->setMaximumSize(1,1);
+
+    splitDockWidget(ui->editorDock, ui->envDock, Qt::Horizontal);
+    splitDockWidget(ui->consoleDock, ui->graphicsDock, Qt::Horizontal);
 
     // Tempolary file for R plots
     m_plotFilePath = "tmpPlot.png";
@@ -33,9 +43,13 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
 
     ui->console->execute(QString("png(\"%1\")").arg(m_plotFilePath), true);
 
+
+    ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
     // after clear & execute png
     connect(ui->editor, &QPlainTextEdit::textChanged, [&] () {m_editorTextChanged = true;});
     connect(ui->console, SIGNAL(command(QString)), SLOT(onCommand(QString)));
+    connect(ui->console, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
 }
 
 MainWindow::~MainWindow()
@@ -62,7 +76,10 @@ void MainWindow::initR()
         }
 
         model.load(&file, ';', true);
-        m_rconsole["input" + QString::number(counter)] = RObject::fromModel(&model);
+
+        QString inVarName = "In_" + QString::number(counter);
+        m_rconsole[inVarName] = RObject::fromModel(&model);
+        addVar(inVarName);
     }
 }
 
@@ -92,6 +109,23 @@ void MainWindow::onCommand(const QString &command)
 
     printOutputBuf();
     m_lastOutput.clear();
+}
+
+void MainWindow::addVar(const QString &s)
+{
+    RVariableWidget *widget = new RVariableWidget(&m_rconsole, s);
+    QListWidgetItem *newWidget = new QListWidgetItem(ui->listWidget, QListWidgetItem::UserType);
+    newWidget->setSizeHint(widget->size());
+    ui->listWidget->setItemWidget(newWidget, widget);
+}
+
+void MainWindow::updateVariables()
+{
+    for (int i = 0; i < ui->listWidget->count(); ++i) {
+        RVariableWidget *rVar = dynamic_cast<RVariableWidget *>(ui->listWidget->itemWidget(ui->listWidget->item(i)));
+        rVar->updateVar();
+        ui->listWidget->item(i)->setSizeHint(rVar->size());
+    }
 }
 
 void MainWindow::onRMessageOk(const QString &message)
@@ -216,8 +250,26 @@ void MainWindow::onSaveAs()
 
 void MainWindow::onExecute()
 {
-    initR();
     ui->console->execute(ui->editor->toPlainText(), true);
+
+    updateVariables();
+}
+
+void MainWindow::onDockToggle(bool checked)
+{
+    QObject *object = sender();
+
+    if (object == ui->actionEditor)
+        ui->editorDock->setVisible(checked);
+
+    else if (object == ui->actionConsole)
+        ui->consoleDock->setVisible(checked);
+
+    else if (object == ui->actionGraphics)
+        ui->graphicsDock->setVisible(checked);
+
+    else if (object == ui->actionEnvironment)
+        ui->envDock->setVisible(checked);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

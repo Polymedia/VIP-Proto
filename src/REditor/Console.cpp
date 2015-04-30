@@ -102,6 +102,7 @@ void Console::onEnter()
     // Ввод пустой строчки
     if (cursor.positionInBlock() == m_currentPromt.length()) {
         insertPrompt();
+        emit enterPressed();
         return;
     }
 
@@ -129,6 +130,8 @@ void Console::onEnter()
         historyAdd(cmd);
         emit command(cmd);
     }
+
+    emit enterPressed();
 }
 
 void Console::output(const QString &s)

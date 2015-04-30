@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QDir>
-#include <QDebug>
 
 #include <RInside/rconsole.h>
 
