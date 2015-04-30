@@ -41,6 +41,9 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     initR();
     clearEditor(false);
 
+    m_rconsole.execute(QString("mypng<-function(filename=\"%1\", ...) {png(filename, ...)}").arg(m_plotFilePath));
+    m_rconsole.execute("options(device = \"mypng\")");
+
     ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     // after clear & execute png
@@ -96,14 +99,6 @@ void MainWindow::setEditorFile(const QString &fileName)
 
 void MainWindow::onCommand(const QString &command)
 {
-    disconnect(&m_rconsole, 0, this, 0);
-
-    m_rconsole.execute(QString("png(\"%1\")").arg(m_plotFilePath));
-
-    connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
-    connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
-    connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
-
     m_rconsole.execute(command);
 
     printOutputBuf();
@@ -146,7 +141,13 @@ void MainWindow::onRParseIncomplete()
 
 void MainWindow::updatePlot()
 {
+    disconnect(&m_rconsole, 0, this, 0);
+
     m_rconsole.execute("dev.off()");
+
+    connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
+    connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
+    connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
 
     QImage plot;
     if (plot.load(m_plotFilePath)) {
