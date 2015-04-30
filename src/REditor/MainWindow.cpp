@@ -41,8 +41,7 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     initR();
     clearEditor(false);
 
-    ui->console->execute(QString("png(\"%1\")").arg(m_plotFilePath), true);
-
+    m_rconsole.execute(QString("png(\"%1\")").arg(m_plotFilePath));
 
     ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
