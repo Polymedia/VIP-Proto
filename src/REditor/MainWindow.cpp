@@ -35,14 +35,23 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     splitDockWidget(ui->consoleDock, ui->graphicsDock, Qt::Horizontal);
 
     // Tempolary file for R plots
-    m_plotFilePath = "tmpPlot.png";
+    m_plotFilePath = "tmpPlot";
     QFile::remove(m_plotFilePath);
+
+    m_rconsole.execute(QString("png_filename_=\"%1\"").arg(m_plotFilePath));
+    m_rconsole.execute(R"(
+        png_functions_ = getNamespaceExports('graphics')
+
+        options(device=function () {dev.cur(); png(filename = paste0(png_filename_, '.png')); dev.control('enable');})
+        png_functions_ = getNamespaceExports('graphics')
+        for (f in png_functions_) {
+            cmd = sprintf('my%s_=%s; %s=function (...) {my%s_(...); sink("NUL"); dev.copy(function () png(paste0(png_filename_, ".png")));  dev.off(); sink();}', f, f, f, f)
+            eval(parse(text=cmd))
+        }
+    )");
 
     initR();
     clearEditor(false);
-
-    ui->console->execute(QString("png(\"%1\")").arg(m_plotFilePath), true);
-
 
     ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
@@ -109,6 +118,8 @@ void MainWindow::onCommand(const QString &command)
 
     printOutputBuf();
     m_lastOutput.clear();
+
+    updatePlot();
 }
 
 void MainWindow::addVar(const QString &s)
@@ -147,8 +158,6 @@ void MainWindow::onRParseIncomplete()
 
 void MainWindow::updatePlot()
 {
-    m_rconsole.execute("dev.off()");
-
     QImage plot;
     if (plot.load(m_plotFilePath)) {
         QPixmap pm = QPixmap::fromImage(plot).scaled(ui->lbPlot->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);

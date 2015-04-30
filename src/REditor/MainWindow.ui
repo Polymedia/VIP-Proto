@@ -91,19 +91,6 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="updatePlot">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Create plot</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="lbPlot">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -329,22 +316,6 @@
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>479</x>
-     <y>295</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>updatePlot</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>updatePlot()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>709</x>
-     <y>65</y>
     </hint>
     <hint type="destinationlabel">
      <x>479</x>
