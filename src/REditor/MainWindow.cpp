@@ -50,6 +50,10 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     connect(ui->editor, &QPlainTextEdit::textChanged, [&] () {m_editorTextChanged = true;});
     connect(ui->console, SIGNAL(command(QString)), SLOT(onCommand(QString)));
     connect(ui->console, SIGNAL(enterPressed()), this, SLOT(updateVariables()));
+
+    connect(&m_rconsole, SIGNAL(write(QString)), SLOT(onRMessageOk(QString)));
+    connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
+    connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
 }
 
 MainWindow::~MainWindow()
