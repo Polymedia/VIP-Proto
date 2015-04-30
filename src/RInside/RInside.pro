@@ -52,6 +52,16 @@ CONFIG(release, debug|release){
                            "$$VCOPY \"$$VS_LIB\" \"$$BIN\\REditor\" *.dll"
     }
 
+    # RServer
+    DLLDESTDIR += $$BIN/RServer
+    CONFIG(DEPLOY_APPS){
+        !isEmpty(QMAKE_POST_LINK) {
+            QMAKE_POST_LINK += &&
+        }
+        QMAKE_POST_LINK += "$$DEPLOYQT \"$$DESTDIR/$${RELEASE_TARGET}.dll\" \"$$BIN/RServer\" && " \
+                           "$$VCOPY \"$$VS_LIB\" \"$$BIN\\RServer\" *.dll"
+    }
+
     # Tests
     CONFIG(INCLUDE_TESTS) {
         DLLDESTDIR += $$TESTS_BIN
