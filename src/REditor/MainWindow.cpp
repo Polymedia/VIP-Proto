@@ -41,8 +41,6 @@ MainWindow::MainWindow(RConsole &r, QWidget *parent) :
     initR();
     clearEditor(false);
 
-    m_rconsole.execute(QString("png(\"%1\")").arg(m_plotFilePath));
-
     ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     // after clear & execute png
@@ -104,6 +102,7 @@ void MainWindow::onCommand(const QString &command)
     connect(&m_rconsole, SIGNAL(error(QString)), SLOT(onRMessageError(QString)));
     connect(&m_rconsole, SIGNAL(parseIncomplete(QString)), SLOT(onRParseIncomplete()));
 
+    m_rconsole.execute(QString("png(\"%1\")").arg(m_plotFilePath));
     m_rconsole.execute(command);
 
     printOutputBuf();
