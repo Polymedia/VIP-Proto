@@ -1,8 +1,62 @@
-﻿<Window x:Class="VIPStudio.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
+﻿<syncfusion:RibbonWindow x:Class="VIPStudio.MainWindow"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"                         
+                         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+                         Title="REditor"
+                         x:Name="MainWindow1"
+                         Width="1087"
+                         Height="635"
+                         SnapsToDevicePixels="True"
+                         WindowStartupLocation="CenterScreen"
+                         WindowState="Normal"
+                         syncfusion:SkinStorage.VisualStyle="Office2010Silver">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <syncfusion:Ribbon x:Name="Ribbon1" VerticalAlignment="Top" Grid.Row="0">
+            <syncfusion:Ribbon.ApplicationMenu>
+                <syncfusion:ApplicationMenu IsPopupOpen="False"/>
+            </syncfusion:Ribbon.ApplicationMenu>
+            <syncfusion:RibbonTab Background="Transparent" Caption="Главная" FocusVisualStyle="{x:Null}" Focusable="False" MinWidth="23" IsChecked="False" >
+                <syncfusion:RibbonBar Focusable="False" Header="Создать расчётную модель" syncfusion:Ribbon.ShowInMoreCommands="False" IsLauncherButtonVisible="False">
+                    <syncfusion:RibbonButton Label="Создать расчётную модель" SizeForm="Large" LargeIcon="img/model.png"/>
+                    <syncfusion:RibbonButton Label="Создать Dashboard" SizeForm="Large" LargeIcon="img/dashboard.png"/>
+                    <syncfusion:RibbonButton Label="Сохранить" SizeForm="Small" SmallIcon="img/save.png"/>
+                    <syncfusion:RibbonButton Label="Сохранить как" SizeForm="Small" SmallIcon="img/saveas.png"/>
+                    <syncfusion:RibbonButton Label="Открыть" SizeForm="Small" SmallIcon="img/open.png"/>
+                </syncfusion:RibbonBar>
+                <syncfusion:RibbonBar Focusable="False" Header="Вид" IsLauncherButtonVisible="False">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <syncfusion:RibbonCheckBox Grid.Row="0" Grid.Column="0" x:Name="CheckBoxRconsole" Content="Командная строка R" Click="CheckBoxRconsole_Click"/>
+                        <syncfusion:RibbonCheckBox Grid.Row="0" Grid.Column="1" x:Name="CheckBoxData" Content="Область данных" Click="CheckBoxData_Click"/>
+                        <syncfusion:RibbonCheckBox Grid.Row="1" Grid.Column="0" x:Name="CheckBoxScript" Content="R скрипт" Click="CheckBoxScript_Click"/>
+                        <syncfusion:RibbonCheckBox Grid.Row="1" Grid.Column="1" x:Name="CheckBoxView" Content="Просмотр данных" Click="CheckBoxView_Click"/>
+                        <syncfusion:RibbonCheckBox Grid.Row="2" Grid.Column="0" x:Name="CheckBoxPlot" Content="R график" Click="CheckBoxPlot_Click"/>
+                        <syncfusion:RibbonCheckBox Grid.Row="2" Grid.Column="1" x:Name="CheckBoxDashboard" Content="Конструктор Dashboard" Click="CheckBoxDashboard_Click"/>
+                    </Grid>
+                </syncfusion:RibbonBar>
+            </syncfusion:RibbonTab>
+        </syncfusion:Ribbon>
+        <syncfusion:DockingManager x:Name="DockingManager1" DockFill="True"  Grid.Row="1" DockStateChanged="DockingManager1_DockStateChanged">
+            <Grid x:Name="WindowData" syncfusion:DockingManager.Header="Окно области данных" syncfusion:DockingManager.State="Dock"/>
+            <Grid x:Name="WindowView" syncfusion:DockingManager.Header="Окно просмотра данных" syncfusion:DockingManager.State="Dock"/>
+            <Grid x:Name="WindowRConsole" syncfusion:DockingManager.Header="Командная строка R" syncfusion:DockingManager.State="Dock"/>
+            <Grid x:Name="WindowScript" syncfusion:DockingManager.Header="R скрипт" syncfusion:DockingManager.State="Dock"/>
+            <Grid x:Name="WindowPlot" syncfusion:DockingManager.Header="R график" syncfusion:DockingManager.State="Dock"/>
+            <Grid x:Name="WindowDashboard" syncfusion:DockingManager.Header="Конструктор Dashboard" syncfusion:DockingManager.State="Dock"/>
+
+            
+        </syncfusion:DockingManager>
     </Grid>
-</Window>
+</syncfusion:RibbonWindow>
